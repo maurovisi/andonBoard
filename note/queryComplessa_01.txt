@@ -1,0 +1,1 @@
+SELECT SUM(num_pz_realizzati) AS sumPzBuoni, SUM(num_pz_scarti) AS sumPzScarti, id_ciclo FROM andon_board WHERE id_operatore = '3' AND id_risorsa = '4' AND ( (data_turno = ('2023-05-25' - INTERVAL 1 DAY) AND orario = '22-23' ) OR (data_turno = ('2023-05-25' - INTERVAL 1 DAY) AND orario = '22-23' ) OR data_turno = '2023-05-25' ) GROUP BY id_ciclo

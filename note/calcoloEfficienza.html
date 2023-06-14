@@ -1,0 +1,73 @@
+<script>
+    $(document).ready(function() {
+        // Ottenere i valori dei pezzi fatti e dei pezzi previsti
+        let pzFatti = parseInt($("#pzFatti_004").text());
+        let pzOra = parseInt($("#pzOra_004").text());
+
+        // Calcolare l'efficienza come percentuale
+        let efficienza = Math.round((pzFatti / pzOra) * 100);
+
+        // Cambiare il colore di sfondo della card in base all'efficienza
+        if (efficienza >= 90) {
+            $("#cardRiepilogo_004").removeClass().addClass("card text-bg-success");
+        } else if (efficienza >= 60) {
+            $("#cardRiepilogo_004").removeClass().addClass("card text-bg-warning");
+        } else {
+            $("#cardRiepilogo_004").removeClass().addClass("card text-bg-danger");
+        }
+    });
+
+    $(document).ready(function() {
+        // Ottenere i valori dei pezzi fatti e dei pezzi previsti
+        let pzFatti = parseInt($("#pzFatti_011").text());
+        let pzOra = parseInt($("#pzOra_011").text());
+
+        // Calcolare l'efficienza come percentuale
+        let efficienza = Math.round((pzFatti / pzOra) * 100);
+
+        // Cambiare il colore di sfondo della card in base all'efficienza
+        if (efficienza >= 90) {
+            $("#cardRiepilogo_011").removeClass().addClass("card text-bg-success");
+        } else if (efficienza >= 60) {
+            $("#cardRiepilogo_011").removeClass().addClass("card text-bg-warning");
+        } else {
+            $("#cardRiepilogo_011").removeClass().addClass("card text-bg-danger");
+        }
+    });
+
+    $(document).ready(function() {
+        // Ottenere i valori dei pezzi fatti e dei pezzi previsti
+        let pzFatti = parseInt($("#pzFatti_020").text());
+        let pzOra = parseInt($("#pzOra_020").text());
+
+        // Calcolare l'efficienza come percentuale
+        let efficienza = Math.round((pzFatti / pzOra) * 100);
+
+        // Cambiare il colore di sfondo della card in base all'efficienza
+        if (efficienza >= 90) {
+            $("#cardRiepilogo_020").removeClass().addClass("card text-bg-success");
+        } else if (efficienza >= 60) {
+            $("#cardRiepilogo_020").removeClass().addClass("card text-bg-warning");
+        } else {
+            $("#cardRiepilogo_020").removeClass().addClass("card text-bg-danger");
+        }
+    });
+
+    $(document).ready(function() {
+        let efficienza = parseInt($("#pzFatti_021").text());
+        let qualita = parseInt($("#pzFatti_021").text());
+        let problemi = parseInt($("#pzOra_021").text());
+
+        // Calcolare l'andamento generale della produzione
+        
+
+        // Cambiare il colore di sfondo della card in base all'efficienza
+        if (efficienza >= 90) {
+            $("#cardRiepilogo_021").removeClass().addClass("card text-bg-success");
+        } else if (efficienza >= 60) {
+            $("#cardRiepilogo_021").removeClass().addClass("card text-bg-warning");
+        } else {
+            $("#cardRiepilogo_021").removeClass().addClass("card text-bg-danger");
+        }
+    });
+</script>
