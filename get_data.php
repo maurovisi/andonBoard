@@ -36,13 +36,15 @@ $queryEfficiency = "";
 
 if ($efficiency = "settimanale" && $what = "risorsa") {
 
-    $queryEfficiency = "SELECT ab.num_pz_realizzati, ab.num_pz_scarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, ab.id_ciclo, ab.pranzo, ab.orario, ab.data_turno
+    $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla
                         FROM
                             andon_board AS ab
                             INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
                             INNER JOIN risorse ON ab.id_risorsa = risorse.id
+                            INNER JOIN operatori ON ab.id_operatore = operatori.id
                         WHERE
-                            ab.data_turno BETWEEN '".$dataSetteGgFa."' AND '".$dataOdierna."' AND risorsa = '".$risorsa."' ";
+                            ab.data_turno BETWEEN '".$dataSetteGgFa."' AND '".$dataOdierna."' AND risorsa = '".$risorsa."'
+                            GROUP BY ab.data_turno, cicli.codice_ciclo, operatori.sigla ";
 
 } elseif ($efficiency = "mensile" && $what = "risorsa") {
     # code...
@@ -73,8 +75,8 @@ $qualitaTot = 0;
 $details = [];
 
 foreach ($dati as $record) {
-    $sumPzBuoni += $record['num_pz_realizzati'];
-    $sumPzScarti += $record['num_pz_scarti'];
+    $sumPzBuoni += $record['totPzRealizzati'];
+    $sumPzScarti += $record['totPzScarti'];
 }
 
 // Calcolo efficienza e qualità totali
@@ -86,8 +88,8 @@ if($sumPzBuoni + $sumPzScarti > 0){
 $numRecord = count($dati);
 
 // calcolo efficienza e qualità per ogni gg, includo anche tutte le righe dei record suddivisi per turno e gg
-   
-if ($numRecord > 0) {    
+
+if ($numRecord > 0 && 1<1) {    
     foreach ($dati as $record) {
         $tempoCiclo = $record['tempo_ciclo'];        
 
@@ -151,10 +153,15 @@ if ($numRecord > 0) {
     $efficienzaTot = round($efficienzaTot, 2);
     $qualitaTot = round($qualitaTot, 2);
 }
-
+/*-
 echo json_encode([
     'data' => $result,
     'efficienzaTot' => $efficienzaTot,
     'qualitaTot' => $qualitaTot,
     'dettagli' => $details,
+]);
+*/
+echo json_encode([
+    'efficienzaTot' => $efficienzaTot,
+    'qualitaTot' => $qualitaTot,
 ]);
