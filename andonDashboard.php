@@ -97,10 +97,14 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
             <thead>
                 <tr>
                     <th>Data</th>
-                    <th>Orario</th>
+                    <th>Ciclo</th>
+                    <th>Operatore</th>
+                    <th>TC</th>
+                    <th>Obiettivo</th>
+                    <th>Pz. Realizz.</th>
+                    <th>Pz. scarti</th>
                     <th>Efficienza</th>
                     <th>Qualità</th>
-                    <th>Dettagli</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -113,11 +117,11 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
     </div>
 
 <script>
-    var risorse = <?php echo json_encode($risorse); ?>;
-    var operatori = <?php echo json_encode($operatori); ?>;
+    let risorse = <?php echo json_encode($risorse); ?>;
+    let operatori = <?php echo json_encode($operatori); ?>;
 
     function getShift(time) {
-        var hour = parseInt(time.split(':')[0]);
+        let hour = parseInt(time.split(':')[0]);
         if (hour >= 6 && hour < 14) {
             return 'Turno 1';
         } else if (hour >= 14 && hour < 22) {
@@ -137,34 +141,45 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                 data: $(this).serialize(),
                 dataType: 'json', // Expect a JSON response
                 success: function(data) {
-                    $('#efficienza-totale').text(data.efficienza.toFixed(2) + '%');
-                    $('#qualita-totale').text(data.qualita.toFixed(2) + '%');
+                    $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
+                    $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
 
-                    var lastDate = '';
-                    var lastShift = '';
+                    let lastDate = '';
+                    let lastShift = '';
 
                     // Clear out the existing rows
                     $('#table-body').empty();
 
                     // Add a new row for each record
-                    $.each(data.records, function(i, record) {
-                        var currentShift = getShift(record.orario);
-                        if (record.data !== lastDate) {
-                            $('#table-body').append('<tr><td colspan="5" class="table-active">' + record.data + '</td></tr>');
-                            lastDate = record.data;
-                        }
-                        if (currentShift !== lastShift) {
-                            $('#table-body').append('<tr><td colspan="5" class="table-secondary">' + currentShift + '</td></tr>');
-                            lastShift = currentShift;
-                        }
-                        var row = $('<tr>');
-                        row.append('<td></td>'); // empty cell for date
-                        row.append('<td>' + record.orario + '</td>');
-                        row.append('<td>' + record.risorsa + '</td>');
-                        row.append('<td>' + record.operatore + '</td>');
+                    let efficienzaTurno = 0;
+                    let qualitaTurno = 0;
+                    let dataTurnoPrec = "";
+                    $.each(data.records, function(i, record) {                        
+                        let row = $('<tr>');
+                        row.append('<td>' + record.data_turno + '</td>');
+                        row.append('<td>' + record.codice_ciclo + '</td>');
+                        row.append('<td>' + record.sigla + '</td>');
+                        row.append('<td>' + record.tempo_ciclo + '</td>');
+                        row.append('<td>' + record.pzDaRealizzare + '</td>');
+                        row.append('<td>' + record.totPzRealizzati + '</td>');
+                        row.append('<td>' + record.totPzScarti + '</td>');
                         row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
-                        row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+                        row.append('<td>' + record.qualita.toFixed(2) + '%</td>');                       
+
+                        // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno
+                        efficienzaTurno += record.efficienza.toFixed(2);
+                        qualitaTurno += record.qualita.toFixed(2);                        
+                        
+                        if (record.data_turno != dataTurnoPrec) {
+                            let row1 = $('<tr>');
+                            row1.append('<td colspan="4">Efficienza turno = ' + record.efficienza.toFixed(2) + '%</td>');
+                            row1.append('<td colspan="4">Qualità turno = ' + record.qualita.toFixed(2) + '%</td>');
+                            row1.append('<td></td>');
+                            $('#table-body').append(row1);
+                        }
+                        
                         $('#table-body').append(row);
+                        dataTurnoPrec = record.data_turno;
                     });
                 }
             });
