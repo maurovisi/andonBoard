@@ -60,18 +60,17 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
     <link rel="stylesheet" href="css/andon_style.css">
 
     <!-- CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.1/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.1/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
 
-<!-- JavaScript -->
-<script src="https://cdn.datatables.net/1.11.1/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.1/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
-<script src="https://cdn.datatables.net/plug-ins/1.11.5/sorting/date-eu.js"></script>
-
+    <!-- JavaScript -->
+    <script src="https://cdn.datatables.net/1.11.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.1/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.11.5/sorting/date-eu.js"></script>
 
 </head>
 <body class="bk">
@@ -102,37 +101,15 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary">Visualizza tabella Bootstrap</button>
-            <button type="button" class="btn btn-primary">Visualizza tabella DataTables</button>
+            <button type="submit" class="btn btn-primary" data-target="bootstrap-table">Visualizza tabella Bootstrap</button>
+            <button type="button" class="btn btn-primary" data-target="data-table">Visualizza tabella DataTables</button>
         </form>
 
         <h4 class="mt-5">Efficienza Totale: <span id="efficienza-totale"></span></h4>
         <h4>Qualità Totale: <span id="qualita-totale"></span></h4>
 
-        <table class="table table-striped mt-4" id="bootstrap-table">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Ciclo</th>
-                    <th>Operatore</th>
-                    <th>TC</th>
-                    <th>Obiettivo</th>
-                    <th>Pz. Realizz.</th>
-                    <th>Pz. scarti</th>
-                    <th>Efficienza</th>
-                    <th>Qualità</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-            </tbody>
-        </table>
-
-        <div id="results">
-            <!-- The results will appear here -->
-        </div>
-
-        <div id="data-table-container" style="display: none;">
-            <table class="table table-striped" id="data-table">
+        <div class="table-container">
+            <table class="table table-striped mt-4" id="bootstrap-table">
                 <thead>
                     <tr>
                         <th>Data</th>
@@ -146,145 +123,199 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                         <th>Qualità</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="table-body">
                 </tbody>
             </table>
+
+            <div id="data-table-container" style="display: none;">
+                <table class="table table-striped" id="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Ciclo</th>
+                            <th>Operatore</th>
+                            <th>TC</th>
+                            <th>Obiettivo</th>
+                            <th>Pz. Realizz.</th>
+                            <th>Pz. scarti</th>
+                            <th>Efficienza</th>
+                            <th>Qualità</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-<script>
-    let risorse = <?php echo json_encode($risorse); ?>;
-    let operatori = <?php echo json_encode($operatori); ?>;
+    <script>
+        let risorse = <?php echo json_encode($risorse); ?>;
+        let operatori = <?php echo json_encode($operatori); ?>;
 
-    function getShift(time) {
-        let hour = parseInt(time.split(':')[0]);
-        if (hour >= 6 && hour < 14) {
-            return 'Turno 1';
-        } else if (hour >= 14 && hour < 22) {
-            return 'Turno 2';
-        } else {
-            return 'Turno 3';
-        }
-    }
-
-    $(document).ready(function() {
-  $('#dataForm').on('submit', function(e) {
-    e.preventDefault();
-
-    $.ajax({
-      type: "POST",
-      url: "get_data.php",
-      data: $(this).serialize(),
-      dataType: 'json', // Expect a JSON response
-      success: function(data) {
-        $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
-        $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
-
-        let lastDate = '';
-        let lastShift = '';
-
-        // Clear out the existing rows
-        $('#table-body').empty();
-
-        // Add a new row for each record
-        let efficienzaTurno = 0;
-        let qualitaTurno = 0;
-        let dataTurnoPrec = "";
-
-        // Populate Bootstrap table
-        $.each(data.records, function(i, record) {
-          let row = $('<tr>');
-          row.append('<td>' + record.data_turno + '</td>');
-          row.append('<td>' + record.codice_ciclo + '</td>');
-          row.append('<td>' + record.sigla + '</td>');
-          row.append('<td>' + record.tempo_ciclo + '</td>');
-          row.append('<td>' + record.pzDaRealizzare + '</td>');
-          row.append('<td>' + record.totPzRealizzati + '</td>');
-          row.append('<td>' + record.totPzScarti + '</td>');
-          row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
-          row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
-
-          // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno
-          efficienzaTurno += record.efficienza.toFixed(2);
-          qualitaTurno += record.qualita.toFixed(2);
-
-          if (record.data_turno != dataTurnoPrec) {
-            let row1 = $('<tr>');
-            row1.append('<td colspan="4">Efficienza turno = ' + record.efficienza.toFixed(2) + '%</td>');
-            row1.append('<td colspan="4">Qualità turno = ' + record.qualita.toFixed(2) + '%</td>');
-            row1.append('<td></td>');
-            $('#table-body').append(row1);
-          }
-
-          $('#table-body').append(row);
-          dataTurnoPrec = record.data_turno;
-        });
-
-        // Destroy DataTables table (if it exists)
-        if ($.fn.DataTable.isDataTable('#data-table')) {
-          $('#data-table').DataTable().destroy();
-          $('#data-table tbody').empty();
+        function getShift(time) {
+            let hour = parseInt(time.split(':')[0]);
+            if (hour >= 6 && hour < 14) {
+                return 'Turno 1';
+            } else if (hour >= 14 && hour < 22) {
+                return 'Turno 2';
+            } else {
+                return 'Turno 3';
+            }
         }
 
-        // Populate DataTables table with data
-        $.each(data.records, function(i, record) {
-          let row = $('<tr>');
-          row.append('<td>' + record.data_turno + '</td>');
-          row.append('<td>' + record.codice_ciclo + '</td>');
-          row.append('<td>' + record.sigla + '</td>');
-          row.append('<td>' + record.tempo_ciclo + '</td>');
-          row.append('<td>' + record.pzDaRealizzare + '</td>');
-          row.append('<td>' + record.totPzRealizzati + '</td>');
-          row.append('<td>' + record.totPzScarti + '</td>');
-          row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
-          row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+        $(document).ready(function() {
+            $('#dataForm').on('submit', function(e) {
+                e.preventDefault();
 
-          $('#data-table tbody').append(row);
+                $.ajax({
+                    type: "POST",
+                    url: "get_data.php",
+                    data: $(this).serialize(),
+                    dataType: 'json', // Expect a JSON response
+                    success: function(data) {
+                        $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
+                        $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
+
+                        let lastDate = '';
+                        let lastShift = '';
+
+                        // Clear out the existing rows
+                        $('#table-body').empty();
+
+                        // Add a new row for each record
+                        let efficienzaTurno = 0;
+                        let qualitaTurno = 0;
+                        let dataTurnoPrec = "";
+
+                        // Populate Bootstrap table
+                        $.each(data.records, function(i, record) {
+                            let row = $('<tr>');
+                            row.append('<td>' + record.data_turno + '</td>');
+                            row.append('<td>' + record.codice_ciclo + '</td>');
+                            row.append('<td>' + record.sigla + '</td>');
+                            row.append('<td>' + record.tempo_ciclo + '</td>');
+                            row.append('<td>' + record.pzDaRealizzare + '</td>');
+                            row.append('<td>' + record.totPzRealizzati + '</td>');
+                            row.append('<td>' + record.totPzScarti + '</td>');
+                            row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
+                            row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+
+                            // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno
+                            efficienzaTurno += record.efficienza.toFixed(2);
+                            qualitaTurno += record.qualita.toFixed(2);
+
+                            if (record.data_turno != dataTurnoPrec) {
+                                let row1 = $('<tr>');
+                                row1.append('<td colspan="4">Efficienza turno = ' + record.efficienza.toFixed(2) + '%</td>');
+                                row1.append('<td colspan="4">Qualità turno = ' + record.qualita.toFixed(2) + '%</td>');
+                                row1.append('<td></td>');
+                                $('#table-body').append(row1);
+                            }
+
+                            $('#table-body').append(row);
+                            dataTurnoPrec = record.data_turno;
+                        });
+
+                        // Destroy DataTables table (if it exists)
+                        if ($.fn.DataTable.isDataTable('#data-table')) {
+                            $('#data-table').DataTable().destroy();
+                            $('#data-table tbody').empty();
+                        }
+
+                        // Populate DataTables table with data
+                        $.each(data.records, function(i, record) {
+                            let row = $('<tr>');
+                            row.append('<td>' + record.data_turno + '</td>');
+                            row.append('<td>' + record.codice_ciclo + '</td>');
+                            row.append('<td>' + record.sigla + '</td>');
+                            row.append('<td>' + record.tempo_ciclo + '</td>');
+                            row.append('<td>' + record.pzDaRealizzare + '</td>');
+                            row.append('<td>' + record.totPzRealizzati + '</td>');
+                            row.append('<td>' + record.totPzScarti + '</td>');
+                            row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
+                            row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+
+                            $('#data-table tbody').append(row);
+                        });
+
+                        // Initialize DataTables
+                        $('#data-table').DataTable({
+                            lengthMenu: [50, 100, 200, -1],
+                            buttons: [
+                                {
+                                    extend: 'copy',
+                                    text: 'Copy',
+                                    exportOptions: {
+                                        columns: ':visible'
+                                    }
+                                },
+                                {
+                                    extend: 'excel',
+                                    text: 'Excel',
+                                    exportOptions: {
+                                        columns: ':visible'
+                                    }
+                                },
+                                {
+                                    extend: 'pdf',
+                                    text: 'PDF',
+                                    exportOptions: {
+                                        columns: ':visible'
+                                    }
+                                },
+                                {
+                                    extend: 'csv',
+                                    text: 'CSV',
+                                    exportOptions: {
+                                        columns: ':visible'
+                                    }
+                                },
+                                {
+                                    extend: 'print',
+                                    text: 'Print',
+                                    exportOptions: {
+                                        columns: ':visible'
+                                    }
+                                },
+                                'colvis'
+                            ]
+                        });
+                    }
+                });
+            });
+
+            $('#what').change(function() {
+                var selection = $(this).val();
+                var options = [];
+
+                if (selection === 'risorsa') {
+                    options = risorse;
+                } else if (selection === 'operatore') {
+                    options = operatori;
+                }
+
+                var select = $('#resources');
+                select.empty();
+
+                $.each(options, function(index, value) {
+                    select.append('<option value="' + value + '">' + value + '</option>');
+                });
+            }).trigger('change'); // Trigger the change event to populate the select on page load
+
+            $('button[data-target]').click(function() {
+                let target = $(this).data('target');
+
+                if (target === 'bootstrap-table') {
+                    $('#bootstrap-table').show();
+                    $('#data-table-container').hide();
+                } else if (target === 'data-table') {
+                    $('#bootstrap-table').hide();
+                    $('#data-table-container').show();
+                }
+            });
         });
-
-        // Initialize DataTables
-        $('#data-table').DataTable({
-          lengthMenu: [50, 100, 200, -1],
-          buttons: [
-            'copy', 'excel', 'pdf', 'csv'
-          ]
-        });
-      }
-    });
-  });
-
-  $('#what').change(function() {
-    var selection = $(this).val();
-    var options = [];
-
-    if (selection === 'risorsa') {
-      options = risorse;
-    } else if (selection === 'operatore') {
-      options = operatori;
-    }
-
-    var select = $('#resources');
-    select.empty();
-
-    $.each(options, function(index, value) {
-      select.append('<option value="' + value + '">' + value + '</option>');
-    });
-  }).trigger('change'); // Trigger the change event to populate the select on page load
-
-  $('button[type="button"]').click(function() {
-    let buttonText = $(this).text();
-
-    if (buttonText === 'Visualizza tabella Bootstrap') {
-      $('#bootstrap-table').show();
-      $('#data-table-container').hide();
-    } else if (buttonText === 'Visualizza tabella DataTables') {
-      $('#bootstrap-table').hide();
-      $('#data-table-container').show();
-    }
-  });
-});
-
-</script>
+    </script>
 
 </body>
 </html>
