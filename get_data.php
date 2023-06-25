@@ -37,7 +37,7 @@ try {
 
     if ($efficiency == "settimanale" && $what == "risorsa") {
 
-        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla
+        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, COUNT(*) AS oreLavoro
                             FROM
                                 andon_board AS ab
                                 INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
@@ -73,20 +73,31 @@ try {
     $stmt->execute();
     $dati = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $tempoMacchinaAccesaTot = 0;
+    $tempoProduzioneTot = 0;
+    $tempoProduzioneScartiTot = 0;
+    $tempoUtileSett_01 = 122400;
     $sumPzBuoni = 0;
     $sumPzScarti = 0;
+    $usoRisorsaTot = 0;
     $efficienzaTot = 0;
     $qualitaTot = 0;
 
     foreach ($dati as $record) {
-        $sumPzBuoni += intval($record['totPzRealizzati']);
-        $sumPzScarti += intval($record['totPzScarti']);
+        $tempoCiclo = intval($record['tempo_ciclo']);
+        $tempoProduzioneTot += intval($record['totPzRealizzati']) * $tempoCiclo;
+        $tempoProduzioneScartiTot += intval($record['totPzScarti']) * $tempoCiclo;
+        $tempoMacchinaAccesaTot += intval($record['oreLavoro']) * 60;
     }
-
+    
     // Calcolo efficienza e qualità totali
-    if($sumPzBuoni + $sumPzScarti > 0){
-        $efficienzaTot = ($sumPzBuoni / ($sumPzBuoni + $sumPzScarti)) * 100;
-        $qualitaTot = ($sumPzBuoni / ($sumPzBuoni + $sumPzScarti)) * 100;
+    if($tempoProduzioneTot + $tempoProduzioneScartiTot > 0){
+        if ($efficiency == "settimanale") {
+            $tempoMacchinaAccesaTot = $tempoMacchinaAccesaTot - (((30*60)*3*5)+(30*60)); // sottraggo i secondi di pausa pranzo
+            $usoRisorsaTot = round(((100 / $tempoUtileSett_01) * $tempoProduzioneTot),2,PHP_ROUND_HALF_UP);
+            $efficienzaTot = round(((100 / $tempoMacchinaAccesaTot) * $tempoProduzioneTot),2,PHP_ROUND_HALF_UP);
+            $qualitaTot = round(($tempoProduzioneTot / ($tempoProduzioneTot + $tempoProduzioneScartiTot) * 100 ),2,PHP_ROUND_HALF_UP);
+        }
     }
 
     $numRecord = count($dati);
@@ -132,6 +143,7 @@ try {
     }
 
     echo json_encode([
+        'usoRisorsaTot' => $usoRisorsaTot,
         'efficienzaTot' => $efficienzaTot,
         'qualitaTot' => $qualitaTot,
         'records' => $details,
