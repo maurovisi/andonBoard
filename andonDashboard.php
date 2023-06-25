@@ -105,8 +105,9 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
             <button type="button" class="btn btn-primary" data-target="data-table">Visualizza tabella DataTables</button>
         </form>
 
-        <h4 class="mt-5">Efficienza Totale: <span id="efficienza-totale"></span></h4>
-        <h4>Qualità Totale: <span id="qualita-totale"></span></h4>
+        <h4 class="mt-5">Utilizzo Risorsa Totale: <span id="usoRisorsaTot"></span></h4>
+        <h4>Efficienza Totale: <span id="efficienza-totale"></span></h4>
+        <h4 class="mb-5">Qualità Totale: <span id="qualita-totale"></span></h4>
 
         <div class="table-container">
             <table class="table table-striped mt-4" id="bootstrap-table">
@@ -174,6 +175,7 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     data: $(this).serialize(),
                     dataType: 'json', // Expect a JSON response
                     success: function(data) {
+                        $('#usoRisorsaTot').text(data.usoRisorsaTot.toFixed(2) + '%');
                         $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
                         $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
 
