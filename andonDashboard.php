@@ -75,34 +75,41 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
 </head>
 <body class="bk">
     <div class="container">
+        <h1 class="mt-4 text-center">Analisi dati Andon Board</h1>
         <form id="dataForm">
-            <div class="mb-3">
-                <label for="efficiency" class="form-label">Efficienza</label>
-                <select class="form-select" id="efficiency" name="efficiency">
-                    <option value="settimanale">Settimanale</option>
-                    <option value="mensile">Mensile</option>
-                    <option value="annuale">Annuale</option>
-                    <option value="tutto">Tutto</option>
-                </select>
+            <div class="row gy-2 gx-3 my-4 align-items-center">
+                <div class="col">
+                    <label for="efficiency" class="form-label"><b>Efficienza</b></label>
+                    <select class="form-select" id="efficiency" name="efficiency">
+                        <option value="settimanale">Settimanale</option>
+                        <option value="mensile">Mensile</option>
+                        <option value="trimestrale">trimestrale</option>
+                        <option value="semestrale">semestrale</option>
+                        <option value="annuale">Annuale</option>
+                        <option value="tutto">Tutto</option>
+                    </select>
+                </div>
+
+                <div class="col">
+                    <label for="what" class="form-label"><b>Di Cosa</b></label>
+                    <select class="form-select" id="what" name="what">
+                        <option value="risorsa">Risorsa</option>
+                        <option value="operatore">Operatore</option>
+                    </select>
+                </div>
+
+                <div class="col">
+                    <label for="resources" class="form-label"><b>Risorse</b></label>
+                    <select class="form-select" id="resources" name="resources">
+                        <!-- Popolated dynamically based on the choice in the "Di Cosa" select -->
+                    </select>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label for="what" class="form-label">Di Cosa</label>
-                <select class="form-select" id="what" name="what">
-                    <option value="risorsa">Risorsa</option>
-                    <option value="operatore">Operatore</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="resources" class="form-label">Risorse</label>
-                <select class="form-select" id="resources" name="resources">
-                    <!-- Popolated dynamically based on the choice in the "Di Cosa" select -->
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary" data-target="bootstrap-table">Visualizza tabella Bootstrap</button>
-            <button type="button" class="btn btn-primary" data-target="data-table">Visualizza tabella DataTables</button>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary" data-target="bootstrap-table">Visualizza tabella Bootstrap</button>
+                <button type="button" class="btn btn-info" data-target="data-table">Visualizza tabella DataTables</button>
+            </div>   
         </form>
 
         <h4 class="mt-5">Utilizzo Risorsa Totale: <span id="usoRisorsaTot"></span></h4>

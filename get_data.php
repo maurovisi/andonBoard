@@ -34,6 +34,7 @@ try {
     $efficienza = 0;
     $qualita = 0;
     $queryEfficiency = "";
+    $queryEfficiency2 = "";
 
     if ($efficiency == "settimanale" && $what == "risorsa") {
 
@@ -45,12 +46,28 @@ try {
                                 INNER JOIN operatori ON ab.id_operatore = operatori.id
                             WHERE
                                 ab.data_turno BETWEEN :dataSetteGgFa AND :dataOdierna AND risorsa = :resources
-                            GROUP BY ab.data_turno, cicli.codice_ciclo, operatori.sigla ";
+                                GROUP BY ab.data_turno, cicli.codice_ciclo, operatori.sigla ";
 
         $stmt = $pdo->prepare($queryEfficiency);
         $stmt->bindParam(':dataSetteGgFa', $dataSetteGgFa);
         $stmt->bindParam(':dataOdierna', $dataOdierna);
         $stmt->bindParam(':resources', $resources);
+
+
+        $queryEfficiency2 = "SELECT ab.num_pz_realizzati, ab.num_pz_scarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, ab.orario, ab.pranzo
+                            FROM
+                                andon_board AS ab
+                                INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
+                                INNER JOIN risorse ON ab.id_risorsa = risorse.id
+                                INNER JOIN operatori ON ab.id_operatore = operatori.id
+                            WHERE
+                                ab.data_turno BETWEEN :dataSetteGgFa AND :dataOdierna AND risorsa = :resources
+                            ORDER BY ab.data_turno, cicli.codice_ciclo, operatori.sigla, ab.orario ";
+
+        $stmt2 = $pdo->prepare($queryEfficiency2);
+        $stmt2->bindParam(':dataSetteGgFa', $dataSetteGgFa);
+        $stmt2->bindParam(':dataOdierna', $dataOdierna);
+        $stmt2->bindParam(':resources', $resources);
 
     } elseif ($efficiency == "mensile" && $what == "risorsa") {
         // ...
@@ -73,34 +90,21 @@ try {
     $stmt->execute();
     $dati = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $stmt2->execute();
+    $dati2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
     $tempoMacchinaAccesaTot = 0;
     $tempoProduzioneTot = 0;
     $tempoProduzioneScartiTot = 0;
-    $tempoUtileSett_01 = 122400;
+    $tempoUtileSett_01 =446400;
     $sumPzBuoni = 0;
     $sumPzScarti = 0;
     $usoRisorsaTot = 0;
     $efficienzaTot = 0;
     $qualitaTot = 0;
 
-    foreach ($dati as $record) {
-        $tempoCiclo = intval($record['tempo_ciclo']);
-        $tempoProduzioneTot += intval($record['totPzRealizzati']) * $tempoCiclo;
-        $tempoProduzioneScartiTot += intval($record['totPzScarti']) * $tempoCiclo;
-        $tempoMacchinaAccesaTot += intval($record['oreLavoro']) * 60;
-    }
-    
-    // Calcolo efficienza e qualità totali
-    if($tempoProduzioneTot + $tempoProduzioneScartiTot > 0){
-        if ($efficiency == "settimanale") {
-            $tempoMacchinaAccesaTot = $tempoMacchinaAccesaTot - (((30*60)*3*5)+(30*60)); // sottraggo i secondi di pausa pranzo
-            $usoRisorsaTot = round(((100 / $tempoUtileSett_01) * $tempoProduzioneTot),2,PHP_ROUND_HALF_UP);
-            $efficienzaTot = round(((100 / $tempoMacchinaAccesaTot) * $tempoProduzioneTot),2,PHP_ROUND_HALF_UP);
-            $qualitaTot = round(($tempoProduzioneTot / ($tempoProduzioneTot + $tempoProduzioneScartiTot) * 100 ),2,PHP_ROUND_HALF_UP);
-        }
-    }
-
     $numRecord = count($dati);
+    $numRecord2 = count($dati2);
 
     // calcolo efficienza e qualità per ogni gg, includo anche tutte le righe dei record suddivisi per turno e gg
 
@@ -117,12 +121,15 @@ try {
 
             if ($tempoCiclo != 0) {
                 $efficienza_record = ($totPzRealizzati * 100 / (27000 / $tempoCiclo));
+                $efficienzaTot += $efficienza_record;                
             } else {
                 $tempoCiclo = "ERRORE";
             }
             
             if ($totPzRealizzati != 0) {
                 $qualita_record = ($totPzRealizzati / ($totPzRealizzati + $totPzScarti)) * 100;
+                $qualitaTot += $qualita_record;
+                $usoRisorsaTot += ($totPzRealizzati + $totPzScarti) * $tempoCiclo;
             }
             
             // Creo un array con i dettagli per ogni giorno e turno            
@@ -140,6 +147,10 @@ try {
             
             $n++;
         }
+
+        $efficienzaTot = $efficienzaTot / $numRecord;
+        $qualitaTot = $qualitaTot / $numRecord;
+        $usoRisorsaTot = (100 / $tempoUtileSett_01) * $usoRisorsaTot;
     }
 
     echo json_encode([
