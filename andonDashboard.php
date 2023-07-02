@@ -147,6 +147,7 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
         <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span></h5>
 
         <div class="table-container">
+
             <table class="table table-striped mt-4" id="bootstrap-table">
                 <thead>
                     <tr>
@@ -197,9 +198,11 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     </tfoot>
                 </table>
             </div>
+
         </div>
     </div>
 
+    
     <script>
         // Ottieni il riferimento alla select dell'efficienza
         let efficiencySelect = document.getElementById("efficiency");
@@ -369,7 +372,7 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                             let row = $('<tr>');
                             row.append('<td>' + record.data_turno + '</td>');
                             row.append('<td>' + record.codice_ciclo + '</td>');
-                            row.append('<td>' + record.sigla + '</td>');
+                            row.append('<td><a href="dettagliOperatore.php?sigla=' + record.sigla + '&data=' + record.data_turno + '&codCiclo=' + record.codice_ciclo + '" target="_blank">' + record.sigla + '</a></td>');
                             row.append('<td>' + record.tempo_ciclo + '</td>');
                             row.append('<td>' + record.pzDaRealizzare + '</td>');
                             row.append('<td>' + record.totPzRealizzati + '</td>');
