@@ -58,10 +58,15 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">  
     <link rel="stylesheet" href="css/andon_style.css">
-
+    
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.1/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+
+    <!-- Additional Libraries for Exporting Data -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
     <!-- JavaScript -->
     <script src="https://cdn.datatables.net/1.11.1/js/jquery.dataTables.min.js"></script>
@@ -83,8 +88,8 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     <select class="form-select" id="efficiency" name="efficiency">
                         <option value="settimanale">Settimanale</option>
                         <option value="mensile">Mensile</option>
-                        <option value="trimestrale">trimestrale</option>
-                        <option value="semestrale">semestrale</option>
+                        <option value="trimestrale">Trimestrale</option>
+                        <option value="semestrale">Semestrale</option>
                         <option value="annuale">Annuale</option>
                         <option value="tutto">Tutto</option>
                     </select>
@@ -105,6 +110,31 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     </select>
                 </div>
             </div>
+            <div class="row gy-2 gx-3 my-4 align-items-center">
+                <div class="col" id="startingPoint" style="display:none">
+                    <label for="start" class="form-label"><b>Mese o Inizio da...</b></label>
+                    <select class="form-select" id="start" name="start">
+                        <option value="01">Gennaio</option>
+                        <option value="02">Febbraio</option>
+                        <option value="03">Marzo</option>
+                        <option value="04">Aprile</option>
+                        <option value="05">Maggio</option>
+                        <option value="06">Giugno</option>
+                        <option value="07">Luglio</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Settembre</option>
+                        <option value="10">Ottobre</option>
+                        <option value="11">Novembre</option>
+                        <option value="12">Dicembre</option>
+                    </select>
+                </div>
+                <div class="col" id="yearRow" style="display:none">
+                    <label for="year" class="form-label"><b>Anno</b></label>
+                    <select class="form-select" id="year" name="year">
+                        <!-- Popolated dynamically with current year and previous 5 years -->
+                    </select>
+                </div>
+            </div>
 
             <div class="text-center">
                 <button type="submit" class="btn btn-primary" data-target="bootstrap-table">Visualizza tabella Bootstrap</button>
@@ -112,9 +142,9 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
             </div>   
         </form>
 
-        <h4 class="mt-5">Utilizzo Risorsa Totale: <span id="usoRisorsaTot"></span></h4>
-        <h4>Efficienza Totale: <span id="efficienza-totale"></span></h4>
-        <h4 class="mb-5">Qualità Totale: <span id="qualita-totale"></span></h4>
+        <h5 class="mt-5">Utilizzo Risorsa Totale: <span class="fw-bold" id="usoRisorsaTot"></span></h5>
+        <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"></span></h5>
+        <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span></h5>
 
         <div class="table-container">
             <table class="table table-striped mt-4" id="bootstrap-table">
@@ -152,10 +182,65 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     </thead>
                     <tbody>
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Data</th>
+                            <th>Ciclo</th>
+                            <th>Operatore</th>
+                            <th>TC</th>
+                            <th>Obiettivo</th>
+                            <th>Pz. Realizz.</th>
+                            <th>Pz. scarti</th>
+                            <th>Efficienza</th>
+                            <th>Qualità</th>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
     </div>
+
+    <script>
+        // Ottieni il riferimento alla select dell'efficienza
+        let efficiencySelect = document.getElementById("efficiency");
+
+        // Ottieni il riferimento alla row contenente la select di start
+        let startRow = document.querySelector("#startingPoint");
+
+        // Ottieni il riferimento alla row dell'anno
+        let yearRow = document.getElementById("yearRow");
+
+        // Aggiungi un event listener per l'evento di cambio valore della select dell'efficienza
+        efficiencySelect.addEventListener("change", function() {
+            // Ottieni il valore selezionato
+            let selectedEfficiency = efficiencySelect.value;
+        
+            // Mostra o nascondi la row di start in base al valore selezionato
+            if (selectedEfficiency === "mensile" || selectedEfficiency === "trimestrale" || selectedEfficiency === "semestrale" || selectedEfficiency === "annuale") {
+                startRow.style.display = "block";
+                yearRow.style.display = "block";
+            } else {
+                startRow.style.display = "none";
+                yearRow.style.display = "none";
+            }
+        });
+
+        // Aggiungi gli anni alla select degli anni
+        let yearSelect = document.getElementById("year");
+        let currentYear = new Date().getFullYear();
+
+        for (let i = currentYear; i >= currentYear - 5; i--) {
+            let option = document.createElement("option");
+            option.value = i;
+            option.text = i;
+            
+            if (i === currentYear) {
+                option.selected = true;
+            }
+            
+            yearSelect.appendChild(option);
+        }
+    </script>
 
     <script>
         let risorse = <?php echo json_encode($risorse); ?>;
@@ -182,7 +267,12 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     data: $(this).serialize(),
                     dataType: 'json', // Expect a JSON response
                     success: function(data) {
-                        $('#usoRisorsaTot').text(data.usoRisorsaTot.toFixed(2) + '%');
+                        if (data.usoRisorsaTot != 'errore') {
+                            $('#usoRisorsaTot').text(data.usoRisorsaTot.toFixed(2) + '%');
+                        } else {
+                            $('#usoRisorsaTot').text('Calcolo non possibile per questa opzione.');
+                        }
+                        
                         $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
                         $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
 
@@ -196,34 +286,76 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                         let efficienzaTurno = 0;
                         let qualitaTurno = 0;
                         let dataTurnoPrec = "";
+                        let m = 0;
+                        let nRows = 1;
+
+                        let lunghezza = Object.keys(data.records).length;
 
                         // Populate Bootstrap table
                         $.each(data.records, function(i, record) {
+                            // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno
+                            let efficienzaParsificata = parseFloat(record.efficienza);
+                            let qualitaParsificata = parseFloat(record.qualita);
+                            efficienzaTurno += efficienzaParsificata;
+                            qualitaTurno += qualitaParsificata;
+                                
+                            if ((record.data_turno != dataTurnoPrec && dataTurnoPrec != "")) {
+                                // devo sottrarre il record appena sommato perchè appartiene al turno dopo, successivamente dovrò assegnare questo valore alle variabili efficienzaTurno e QualitaTurno per non perderne traccia
+                                efficienzaTurno -= efficienzaParsificata;
+                                qualitaTurno -= qualitaParsificata;
+                                    
+                                if (m > 0) {
+                                    efficienzaTurno = (efficienzaTurno/m).toFixed(2);
+                                    qualitaTurno = (qualitaTurno/m).toFixed(2);
+                                } else {
+                                    efficienzaTurno = efficienzaTurno.toFixed(2);
+                                    qualitaTurno = qualitaTurno.toFixed(2);
+                                }
+                                                                    
+                                let row1 = $('<tr>');
+                                row1.append('<td colspan="4">Efficienza turno = ' + efficienzaTurno + '%</td>');
+                                row1.append('<td colspan="4">Qualità turno = ' + qualitaTurno + '%</td>');
+                                row1.append('<td></td></tr>');
+                                $('#table-body').append(row1);
+
+                                efficienzaTurno = efficienzaParsificata;
+                                qualitaTurno = qualitaParsificata;
+                                m = 0;
+                            }
+
+                            dataTurnoPrec = record.data_turno;
+                            
                             let row = $('<tr>');
                             row.append('<td>' + record.data_turno + '</td>');
                             row.append('<td>' + record.codice_ciclo + '</td>');
-                            row.append('<td>' + record.sigla + '</td>');
+                            row.append('<td><a href="dettagliOperatore.php?sigla=' + record.sigla + '&data=' + record.data_turno + '&codCiclo=' + record.codice_ciclo + '" target="_blank">' + record.sigla + '</a></td>');
                             row.append('<td>' + record.tempo_ciclo + '</td>');
                             row.append('<td>' + record.pzDaRealizzare + '</td>');
                             row.append('<td>' + record.totPzRealizzati + '</td>');
                             row.append('<td>' + record.totPzScarti + '</td>');
                             row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
                             row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
-
-                            // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno
-                            efficienzaTurno += record.efficienza.toFixed(2);
-                            qualitaTurno += record.qualita.toFixed(2);
-
-                            if (record.data_turno != dataTurnoPrec) {
-                                let row1 = $('<tr>');
-                                row1.append('<td colspan="4">Efficienza turno = ' + record.efficienza.toFixed(2) + '%</td>');
-                                row1.append('<td colspan="4">Qualità turno = ' + record.qualita.toFixed(2) + '%</td>');
-                                row1.append('<td></td>');
-                                $('#table-body').append(row1);
-                            }
+                            row.append('</tr>');
 
                             $('#table-body').append(row);
-                            dataTurnoPrec = record.data_turno;
+
+                            if (nRows == lunghezza) {
+                                if (m > 0) {
+                                    ++m;
+                                    efficienzaTurno = (efficienzaTurno/m);
+                                    qualitaTurno = (qualitaTurno/m);
+                                }
+                                    
+                                let row2 = $('<tr>');
+                                row2.append('<td colspan="4">Efficienza turno = ' + efficienzaTurno.toFixed(2) + '%</td>');
+                                row2.append('<td colspan="4">Qualità turno = ' + qualitaTurno.toFixed(2) + '%</td>');
+                                row2.append('<td></td></tr>');
+                                $('#table-body').append(row2);
+                            }
+
+                            m++;
+                            nRows++;
+                            
                         });
 
                         // Destroy DataTables table (if it exists)
@@ -244,6 +376,7 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                             row.append('<td>' + record.totPzScarti + '</td>');
                             row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
                             row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+                            row.append('</tr>');
 
                             $('#data-table tbody').append(row);
                         });
@@ -289,7 +422,7 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                                 },
                                 'colvis'
                             ]
-                        });
+                        }).buttons().container().appendTo('#data-table_wrapper .col-md-6:eq(0)');
                     }
                 });
             });

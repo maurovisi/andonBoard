@@ -104,26 +104,20 @@ try {
         $sumPzScartiMattino = 0;
         $efficienzaMattino = 0;
         $qualitaMattino = 0;
-
-        foreach ($dati as $record) {
-            $sumPzBuoniMattino += $record['num_pz_realizzati'];
-            $sumPzScartiMattino += $record['num_pz_scarti'];
-        }
+        $tempoLavorazioneUtileMatt = 0;
+        $pzMaxMatt = 0;
 
         $numRecord = count($dati);
-
+        
         if ($numRecord > 0) {    
             foreach ($dati as $record) {
-                $tempoCiclo = $record['tempo_ciclo'];        
-
-                if ($record['pranzo'] === NULL) {
-                    $efficienzaMattino += ($record['num_pz_realizzati'] * 100 / (3600 / $tempoCiclo));
-                } else {
-                    $efficienzaMattino += ($record['num_pz_realizzati'] * 100 / (1800 / $tempoCiclo));
-                }
+                $sumPzBuoniMattino += $record['num_pz_realizzati'];
+                $sumPzScartiMattino += $record['num_pz_scarti'];
+                $tempoLavorazioneUtileMatt = $record['pranzo'] === NULL ? 3600 : 1800;
+                $pzMaxMatt += $tempoLavorazioneUtileMatt / $record['tempo_ciclo'];               
             }
 
-            $efficienzaMattino = round(($efficienzaMattino/$numRecord),2,PHP_ROUND_HALF_UP);
+            $efficienzaMattino = round(((100/$pzMaxMatt)*$sumPzBuoniMattino),2,PHP_ROUND_HALF_UP);
             
             if ($sumPzBuoniMattino != 0) {
                 $qualitaMattino = round((100 - ($sumPzScartiMattino / $sumPzBuoniMattino) * 100),2,PHP_ROUND_HALF_UP);
@@ -151,26 +145,20 @@ try {
         $sumPzScartiPomeriggio = 0;
         $efficienzaPomeriggio = 0;
         $qualitaPomeriggio = 0;
-
-        foreach ($dati as $record) {
-            $sumPzBuoniPomeriggio += $record['num_pz_realizzati'];
-            $sumPzScartiPomeriggio += $record['num_pz_scarti'];
-        }
+        $tempoLavorazioneUtilePome = 0;
+        $pzMaxPome = 0;
 
         $numRecord = count($dati);
-
+        
         if ($numRecord > 0) {    
             foreach ($dati as $record) {
-                $tempoCiclo = $record['tempo_ciclo'];        
-
-                if ($record['pranzo'] === NULL) {
-                    $efficienzaPomeriggio += ($record['num_pz_realizzati'] * 100 / (3600 / $tempoCiclo));
-                } else {
-                    $efficienzaPomeriggio += ($record['num_pz_realizzati'] * 100 / (1800 / $tempoCiclo));
-                }
+                $sumPzBuoniPomeriggio += $record['num_pz_realizzati'];
+                $sumPzScartiPomeriggio += $record['num_pz_scarti'];
+                $tempoLavorazioneUtilePome = $record['pranzo'] === NULL ? 3600 : 1800;
+                $pzMaxPome += $tempoLavorazioneUtilePome / $record['tempo_ciclo'];               
             }
 
-            $efficienzaPomeriggio = round(($efficienzaPomeriggio/$numRecord),2,PHP_ROUND_HALF_UP);
+            $efficienzaPomeriggio = round(((100/$pzMaxPome)*$sumPzBuoniPomeriggio),2,PHP_ROUND_HALF_UP);
             
             if ($sumPzBuoniPomeriggio != 0) {
                 $qualitaPomeriggio = round((100 - ($sumPzScartiPomeriggio / $sumPzBuoniPomeriggio) * 100),2,PHP_ROUND_HALF_UP);
@@ -197,26 +185,20 @@ try {
         $sumPzScartiNotte = 0;
         $efficienzaNotte = 0;
         $qualitaNotte = 0;
-
-        foreach ($dati as $record) {
-            $sumPzBuoniNotte += $record['num_pz_realizzati'];
-            $sumPzScartiNotte += $record['num_pz_scarti'];
-        }
+        $tempoLavorazioneUtileNotte = 0;
+        $pzMaxNotte = 0;
 
         $numRecord = count($dati);
-
+        
         if ($numRecord > 0) {    
             foreach ($dati as $record) {
-                $tempoCiclo = $record['tempo_ciclo'];        
-
-                if ($record['pranzo'] === NULL) {
-                    $efficienzaNotte += ($record['num_pz_realizzati'] * 100 / (3600 / $tempoCiclo));
-                } else {
-                    $efficienzaNotte += ($record['num_pz_realizzati'] * 100 / (1800 / $tempoCiclo));
-                }
+                $sumPzBuoniNotte += $record['num_pz_realizzati'];
+                $sumPzScartiNotte += $record['num_pz_scarti'];
+                $tempoLavorazioneUtileNotte = $record['pranzo'] === NULL ? 3600 : 1800;
+                $pzMaxNotte += $tempoLavorazioneUtileNotte / $record['tempo_ciclo'];               
             }
 
-            $efficienzaNotte = round(($efficienzaNotte/$numRecord),2,PHP_ROUND_HALF_UP);
+            $efficienzaNotte = round(((100/$pzMaxNotte)*$sumPzBuoniNotte),2,PHP_ROUND_HALF_UP);
             
             if ($sumPzBuoniNotte != 0) {
                 $qualitaNotte = round((100 - ($sumPzScartiNotte / $sumPzBuoniNotte) * 100),2,PHP_ROUND_HALF_UP);
@@ -282,28 +264,20 @@ try {
         $sumPzScartiMattino = 0;
         $efficienzaMattino = 0;
         $qualitaMattino = 0;
-
-        foreach ($dati as $record) {
-            $sumPzBuoniMattino += $record['num_pz_realizzati'];
-            $sumPzScartiMattino += $record['num_pz_scarti'];
-        }
+        $tempoLavorazioneUtileMatt = 0;
+        $pzMaxMatt = 0;
 
         $numRecord = count($dati);
-
+        
         if ($numRecord > 0) {    
             foreach ($dati as $record) {
-                $tempoCiclo = $record['tempo_ciclo'];        
-                
-                if ($record['pranzo'] === NULL) {
-                    //$efficienzaMattino += (100 / (3600 / $tempoCiclo) ) * $record['num_pz_realizzati'];
-                    $efficienzaMattino += ($record['num_pz_realizzati'] * 100 / (3600 / $tempoCiclo));
-                } else {
-                    //$efficienzaMattino += (100 / (1800 / $tempoCiclo) ) * $record['num_pz_realizzati'];
-                    $efficienzaMattino += ($record['num_pz_realizzati'] * 100 / (1800 / $tempoCiclo));
-                }
+                $sumPzBuoniMattino += $record['num_pz_realizzati'];
+                $sumPzScartiMattino += $record['num_pz_scarti'];
+                $tempoLavorazioneUtileMatt = $record['pranzo'] === NULL ? 3600 : 1800;
+                $pzMaxMatt += $tempoLavorazioneUtileMatt / $record['tempo_ciclo'];               
             }
 
-            $efficienzaMattino = round(($efficienzaMattino/$numRecord),2,PHP_ROUND_HALF_UP);
+            $efficienzaMattino = round(((100/$pzMaxMatt)*$sumPzBuoniMattino),2,PHP_ROUND_HALF_UP);
             
             if ($sumPzBuoniMattino != 0) {
                 $qualitaMattino = round((100 - ($sumPzScartiMattino / $sumPzBuoniMattino) * 100),2,PHP_ROUND_HALF_UP);
@@ -332,26 +306,20 @@ try {
         $sumPzScartiPomeriggio = 0;
         $efficienzaPomeriggio = 0;
         $qualitaPomeriggio = 0;
-
-        foreach ($dati as $record) {
-            $sumPzBuoniPomeriggio += $record['num_pz_realizzati'];
-            $sumPzScartiPomeriggio += $record['num_pz_scarti'];
-        }
+        $tempoLavorazioneUtilePome = 0;
+        $pzMaxPome = 0;
 
         $numRecord = count($dati);
         
         if ($numRecord > 0) {    
             foreach ($dati as $record) {
-                $tempoCiclo = $record['tempo_ciclo'];        
-
-                if ($record['pranzo'] === NULL) {
-                    $efficienzaPomeriggio += ($record['num_pz_realizzati'] * 100 / (3600 / $tempoCiclo));
-                } else {
-                    $efficienzaPomeriggio += ($record['num_pz_realizzati'] * 100 / (1800 / $tempoCiclo));
-                }
+                $sumPzBuoniPomeriggio += $record['num_pz_realizzati'];
+                $sumPzScartiPomeriggio += $record['num_pz_scarti'];
+                $tempoLavorazioneUtilePome = $record['pranzo'] === NULL ? 3600 : 1800;
+                $pzMaxPome += $tempoLavorazioneUtilePome / $record['tempo_ciclo'];               
             }
 
-            $efficienzaPomeriggio = round(($efficienzaPomeriggio/$numRecord),2,PHP_ROUND_HALF_UP);
+            $efficienzaPomeriggio = round(((100/$pzMaxPome)*$sumPzBuoniPomeriggio),2,PHP_ROUND_HALF_UP);
             
             if ($sumPzBuoniPomeriggio != 0) {
                 $qualitaPomeriggio = round((100 - ($sumPzScartiPomeriggio / $sumPzBuoniPomeriggio) * 100),2,PHP_ROUND_HALF_UP);
@@ -374,31 +342,26 @@ try {
 
         $stmt = $pdo->query($queryDati);
         $dati = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        
         $sumPzBuoniNotte = 0;
         $sumPzScartiNotte = 0;
         $efficienzaNotte = 0;
         $qualitaNotte = 0;
-
-        foreach ($dati as $record) {
-            $sumPzBuoniNotte += $record['num_pz_realizzati'];
-            $sumPzScartiNotte += $record['num_pz_scarti'];
-        }
+        $tempoLavorazioneUtileNotte = 0;
+        $pzMaxNotte = 0;
 
         $numRecord = count($dati);
         
         if ($numRecord > 0) {    
             foreach ($dati as $record) {
-                $tempoCiclo = $record['tempo_ciclo'];        
-
-                if ($record['pranzo'] === NULL) {
-                    $efficienzaNotte += ($record['num_pz_realizzati'] * 100 / (3600 / $tempoCiclo));
-                } else {
-                    $efficienzaNotte += ($record['num_pz_realizzati'] * 100 / (1800 / $tempoCiclo));
-                }
+                $sumPzBuoniNotte += $record['num_pz_realizzati'];
+                $sumPzScartiNotte += $record['num_pz_scarti'];
+                $tempoLavorazioneUtileNotte = $record['pranzo'] === NULL ? 3600 : 1800;
+                $pzMaxNotte += $tempoLavorazioneUtileNotte / $record['tempo_ciclo'];               
             }
 
-            $efficienzaNotte = round(($efficienzaNotte/$numRecord),2,PHP_ROUND_HALF_UP);
+            $efficienzaNotte = round(((100/$pzMaxNotte)*$sumPzBuoniNotte),2,PHP_ROUND_HALF_UP); 
+            //$efficienzaNotte = round(($efficienzaNotte/$numRecord),2,PHP_ROUND_HALF_UP);
             
             if ($sumPzBuoniNotte != 0) {
                 $qualitaNotte = round((100 - ($sumPzScartiNotte / $sumPzBuoniNotte) * 100),2,PHP_ROUND_HALF_UP);
