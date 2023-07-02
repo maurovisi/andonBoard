@@ -124,75 +124,88 @@ if ($numRecord > 0) {
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
     <script src="https://cdn.datatables.net/plug-ins/1.11.5/sorting/date-eu.js"></script>
 
+    <!-- CSS personalized -->
+    <link rel="stylesheet" href="css/stickyFooter.css">
+
 </head>
-<body class="bk">
-    <div class="container">
+<body class="bk d-flex flex-column h-100">
+    <header>
         <h1 class="mt-4 text-center">Analisi dati specifici</h1>
+    </header>
 
-        <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"><?= $efficienza ?>%</span></h5>
-        <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"><?= $qualita ?>%</span></h5>
+    <main class="flex-shrink-0">
+        <div class="container mb-4">
+            <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"><?= $efficienza ?>%</span></h5>
+            <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"><?= $qualita ?>%</span></h5>
 
-        <!-- Tabella dei dati -->
-        <div class="table-responsive mt-4">
-            <table id="data-table" class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Data Turno</th>
-                        <th>Orario</th>
-                        <th>Sigla Operatore</th>
-                        <th>Codice Ciclo</th>
-                        <th>Tempo Ciclo</th>
-                        <th>Pezzi da Realizzare</th>
-                        <th>Risorsa</th>
-                        <th>Pezzi per Ora</th>
-                        <th>Pezzi Realizzati</th>                        
-                        <th>Pezzi Scarti</th>
-                        <th>Pranzo</th>
-                        <th>Note</th>                        
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($result as $record) : ?>
+            <!-- Tabella dei dati -->
+            <div class="table-responsive mt-4">
+                <table id="data-table" class="table table-striped table-bordered">
+                    <thead>
                         <tr>
-                            <td><?php echo $record['data_turno']; ?></td>
-                            <td><?php echo $record['orario']; ?></td>
-                            <td><?php echo $record['sigla']; ?></td>
-                            <td><?php echo $record['codice_ciclo']; ?></td>
-                            <td><?php echo $record['tempo_ciclo']; ?></td>
-                            <td><?php echo $record['pzDaRealizzare']; ?></td>
-                            <td><?php echo $record['risorsa']; ?></td>
-                            <td><?php echo $record['num_pz_ora']; ?></td>
-                            <td><?php echo $record['num_pz_realizzati']; ?></td>                            
-                            <td><?php echo $record['num_pz_scarti']; ?></td>
-                            <td><?php echo $record['pranzo'] !== NULL ? 'YES' : '-'; ?></td>
-                            <td><?php echo $record['note'] == '' ? '-' : $record['note']; ?></td>
+                            <th>Data Turno</th>
+                            <th>Orario</th>
+                            <th>Sigla Operatore</th>
+                            <th>Codice Ciclo</th>
+                            <th>Tempo Ciclo</th>
+                            <th>Pezzi da Realizzare</th>
+                            <th>Risorsa</th>
+                            <th>Pezzi per Ora</th>
+                            <th>Pezzi Realizzati</th>                        
+                            <th>Pezzi Scarti</th>
+                            <th>Pranzo</th>
+                            <th>Note</th>                        
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($result as $record) : ?>
+                            <tr>
+                                <td><?php echo $record['data_turno']; ?></td>
+                                <td><?php echo $record['orario']; ?></td>
+                                <td><?php echo $record['sigla']; ?></td>
+                                <td><?php echo $record['codice_ciclo']; ?></td>
+                                <td><?php echo $record['tempo_ciclo']; ?></td>
+                                <td><?php echo $record['pzDaRealizzare']; ?></td>
+                                <td><?php echo $record['risorsa']; ?></td>
+                                <td><?php echo $record['num_pz_ora']; ?></td>
+                                <td><?php echo $record['num_pz_realizzati']; ?></td>                            
+                                <td><?php echo $record['num_pz_scarti']; ?></td>
+                                <td><?php echo $record['pranzo'] !== NULL ? 'YES' : '-'; ?></td>
+                                <td><?php echo $record['note'] == '' ? '-' : $record['note']; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
+    </main>
 
-        <!-- Script JS -->
-        <script>
-            $(document).ready(function() {
-                $('#data-table').DataTable({
-                    dom: 'Bfrtip',
-                    buttons: [
-                        'copy', 'csv', 'excel', 'pdf', 'print',
-                        {
-                            extend: 'colvis',
-                            columns: ':not(:first-child)'
-                        }
-                    ],
-                    order: [[9, 'asc']],
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/Italian.json'
-                    },
-                    pageLength: 50,
-                    lengthMenu: [50, 100, 250, -1],
-                });
+    <?php
+        include "footer.php";
+    ?>
+
+
+    <!-- Script JS -->
+    <script>
+        $(document).ready(function() {
+            $('#data-table').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print',
+                    {
+                        extend: 'colvis',
+                        columns: ':not(:first-child)'
+                    }
+                ],
+                order: [[9, 'asc']],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/Italian.json'
+                },
+                pageLength: 50,
+                lengthMenu: [50, 100, 250, -1],
             });
-        </script>
-    </div>
+        });
+    </script>       
+    
 </body>
 </html>

@@ -410,156 +410,168 @@ try {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">  
     <link rel="stylesheet" href="css/andon_style.css">
+    <!-- CSS personalized -->
+    <link rel="stylesheet" href="css/stickyFooter.css">
 </head>
-<body>
-    <div class="container">
+<body class="d-flex flex-column h-100">
+    <header>
+        <h1 class="mt-4 text-center">Analisi dati turno corrente</h1>
+    </header>
 
-        <table class="table caption-top">
-            <caption>Turno del Mattino</caption>
-            <thead>
-                <tr>
-                    <th scope="col">orario</th>
-                    <th scope="col">num_pz_ora</th>
-                    <th scope="col">num_pz_realizzati</th>
-                    <th scope="col">num_pz_scarti</th>
-                    <th scope="col">risorsa</th>
-                    <th scope="col">sigla</th>
-                    <th scope="col">tempo_ciclo</th>
-                    <th scope="col">data_turno</th>
-                    <th scope="col">note</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($turnoMattino as $record): ?>
+    <main class="flex-shrink-0">
+        <div class="container mb-4">
+
+            <table class="table caption-top">
+                <caption>Turno del Mattino</caption>
+                <thead>
                     <tr>
-                        <th scope="row"><?php echo $record['orario']; ?></th>
-                        <?php foreach ($record as $key => $value): ?>
-                        <?php if ($key !== 'orario' && $key !== 'pranzo'): ?>
-                            <?php if ($key == 'num_pz_ora' && $record['pranzo'] !== NULL): ?>
-                                <?php $value = floor($value / 2); ?>
-                            <?php endif; ?>
-                            <td><?php echo $value; ?></td>
-                        <?php endif; ?>
-                        <?php 
-                            $sumPzObiettivoMattino += ($key == 'num_pz_ora') ? $value : 0 ;
-                            endforeach; 
-                        ?>
+                        <th scope="col">orario</th>
+                        <th scope="col">num_pz_ora</th>
+                        <th scope="col">num_pz_realizzati</th>
+                        <th scope="col">num_pz_scarti</th>
+                        <th scope="col">risorsa</th>
+                        <th scope="col">sigla</th>
+                        <th scope="col">tempo_ciclo</th>
+                        <th scope="col">data_turno</th>
+                        <th scope="col">note</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th scope="row" colspan="3">pz./turno = <?= $sumPzObiettivoMattino; ?></th>
-                    <th scope="row" colspan="3">pz. buoni = <?= $sumPzBuoniMattino; ?></th>
-                    <th scope="row" colspan="3">pz. scarti = <?= $sumPzScartiMattino; ?></th>
-                </tr>
-                <tr>
-                    <th scope="row" colspan="3">efficienza = <?= $efficienzaMattino; ?>%</th>
-                    <th scope="row" colspan="3">qualità = <?= $qualitaMattino; ?>%</th>
-                    <td colspan="3"></td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <hr>
-
-        <table class="table caption-top">
-            <caption>Turno del Pomeriggio</caption>
-            <thead>
-                <tr>
-                    <th scope="col">orario</th>
-                    <th scope="col">num_pz_ora</th>
-                    <th scope="col">num_pz_realizzati</th>
-                    <th scope="col">num_pz_scarti</th>
-                    <th scope="col">risorsa</th>
-                    <th scope="col">sigla</th>
-                    <th scope="col">tempo_ciclo</th>
-                    <th scope="col">data_turno</th>
-                    <th scope="col">note</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($turnoPomeriggio as $record): ?>
+                </thead>
+                <tbody>
+                    <?php foreach ($turnoMattino as $record): ?>
+                        <tr>
+                            <th scope="row"><?php echo $record['orario']; ?></th>
+                            <?php foreach ($record as $key => $value): ?>
+                            <?php if ($key !== 'orario' && $key !== 'pranzo'): ?>
+                                <?php if ($key == 'num_pz_ora' && $record['pranzo'] !== NULL): ?>
+                                    <?php $value = floor($value / 2); ?>
+                                <?php endif; ?>
+                                <td><?php echo $value; ?></td>
+                            <?php endif; ?>
+                            <?php 
+                                $sumPzObiettivoMattino += ($key == 'num_pz_ora') ? $value : 0 ;
+                                endforeach; 
+                            ?>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
                     <tr>
-                        <th scope="row"><?php echo $record['orario']; ?></th>
-                        <?php foreach ($record as $key => $value): ?>
-                        <?php if ($key !== 'orario' && $key !== 'pranzo'): ?>
-                            <?php if ($key == 'num_pz_ora' && $record['pranzo'] !== NULL): ?>
-                                <?php $value = floor($value / 2); ?>
-                            <?php endif; ?>
-                            <td><?php echo $value; ?></td>
-                        <?php endif; ?>
-                        <?php 
-                            $sumPzObiettivoPomeriggio += ($key == 'num_pz_ora') ? $value : 0 ;
-                            endforeach; 
-                        ?>
+                        <th scope="row" colspan="3">pz./turno = <?= $sumPzObiettivoMattino; ?></th>
+                        <th scope="row" colspan="3">pz. buoni = <?= $sumPzBuoniMattino; ?></th>
+                        <th scope="row" colspan="3">pz. scarti = <?= $sumPzScartiMattino; ?></th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th scope="row" colspan="3">pz./turno = <?= $sumPzObiettivoPomeriggio; ?></th>
-                    <th scope="row" colspan="3">pz. buoni = <?= $sumPzBuoniPomeriggio; ?></th>
-                    <th scope="row" colspan="3">pz. scarti = <?= $sumPzScartiPomeriggio; ?></th>
-                </tr>
-                <tr>
-                    <th scope="row" colspan="3">efficienza = <?= $efficienzaPomeriggio; ?>%</th>
-                    <th scope="row" colspan="3">qualità = <?= $qualitaPomeriggio; ?>%</th>
-                    <td colspan="3"></td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <hr>
-
-        <table class="table caption-top">
-            <caption>Turno della Notte</caption>
-            <thead>
-                <tr>
-                    <th scope="col">orario</th>
-                    <th scope="col">num_pz_ora</th>
-                    <th scope="col">num_pz_realizzati</th>
-                    <th scope="col">num_pz_scarti</th>
-                    <th scope="col">risorsa</th>
-                    <th scope="col">sigla</th>
-                    <th scope="col">tempo_ciclo</th>
-                    <th scope="col">data_turno</th>
-                    <th scope="col">note</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($turnoNotte as $record): ?>
                     <tr>
-                        <th scope="row"><?php echo $record['orario']; ?></th>
-                        <?php foreach ($record as $key => $value): ?>
-                        <?php if ($key !== 'orario' && $key !== 'pranzo'): ?>
-                            <?php if ($key == 'num_pz_ora' && $record['pranzo'] !== NULL): ?>
-                                <?php $value = floor($value / 2); ?>
-                            <?php endif; ?>
-                            <td><?php echo $value; ?></td>
-                        <?php endif; ?>
-                        <?php 
-                            $sumPzObiettivoNotte += ($key == 'num_pz_ora') ? $value : 0 ;
-                            endforeach; 
-                        ?>
+                        <th scope="row" colspan="3">efficienza = <?= $efficienzaMattino; ?>%</th>
+                        <th scope="row" colspan="3">qualità = <?= $qualitaMattino; ?>%</th>
+                        <td colspan="3"></td>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th scope="row" colspan="3">pz./turno = <?= $sumPzObiettivoNotte; ?></th>
-                    <th scope="row" colspan="3">pz. buoni = <?= $sumPzBuoniNotte; ?></th>
-                    <th scope="row" colspan="3">pz. scarti = <?= $sumPzScartiNotte; ?></th>
-                </tr>
-                <tr>
-                    <th scope="row" colspan="3">efficienza = <?= $efficienzaNotte; ?>%</th>
-                    <th scope="row" colspan="3">qualità = <?= $qualitaNotte; ?>%</th>
-                    <td colspan="3"></td>
-                </tr>
-            </tfoot>
-        </table>
+                </tfoot>
+            </table>
 
-    </div>
+            <hr>
+
+            <table class="table caption-top">
+                <caption>Turno del Pomeriggio</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">orario</th>
+                        <th scope="col">num_pz_ora</th>
+                        <th scope="col">num_pz_realizzati</th>
+                        <th scope="col">num_pz_scarti</th>
+                        <th scope="col">risorsa</th>
+                        <th scope="col">sigla</th>
+                        <th scope="col">tempo_ciclo</th>
+                        <th scope="col">data_turno</th>
+                        <th scope="col">note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($turnoPomeriggio as $record): ?>
+                        <tr>
+                            <th scope="row"><?php echo $record['orario']; ?></th>
+                            <?php foreach ($record as $key => $value): ?>
+                            <?php if ($key !== 'orario' && $key !== 'pranzo'): ?>
+                                <?php if ($key == 'num_pz_ora' && $record['pranzo'] !== NULL): ?>
+                                    <?php $value = floor($value / 2); ?>
+                                <?php endif; ?>
+                                <td><?php echo $value; ?></td>
+                            <?php endif; ?>
+                            <?php 
+                                $sumPzObiettivoPomeriggio += ($key == 'num_pz_ora') ? $value : 0 ;
+                                endforeach; 
+                            ?>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row" colspan="3">pz./turno = <?= $sumPzObiettivoPomeriggio; ?></th>
+                        <th scope="row" colspan="3">pz. buoni = <?= $sumPzBuoniPomeriggio; ?></th>
+                        <th scope="row" colspan="3">pz. scarti = <?= $sumPzScartiPomeriggio; ?></th>
+                    </tr>
+                    <tr>
+                        <th scope="row" colspan="3">efficienza = <?= $efficienzaPomeriggio; ?>%</th>
+                        <th scope="row" colspan="3">qualità = <?= $qualitaPomeriggio; ?>%</th>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr>
+
+            <table class="table caption-top">
+                <caption>Turno della Notte</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">orario</th>
+                        <th scope="col">num_pz_ora</th>
+                        <th scope="col">num_pz_realizzati</th>
+                        <th scope="col">num_pz_scarti</th>
+                        <th scope="col">risorsa</th>
+                        <th scope="col">sigla</th>
+                        <th scope="col">tempo_ciclo</th>
+                        <th scope="col">data_turno</th>
+                        <th scope="col">note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($turnoNotte as $record): ?>
+                        <tr>
+                            <th scope="row"><?php echo $record['orario']; ?></th>
+                            <?php foreach ($record as $key => $value): ?>
+                            <?php if ($key !== 'orario' && $key !== 'pranzo'): ?>
+                                <?php if ($key == 'num_pz_ora' && $record['pranzo'] !== NULL): ?>
+                                    <?php $value = floor($value / 2); ?>
+                                <?php endif; ?>
+                                <td><?php echo $value; ?></td>
+                            <?php endif; ?>
+                            <?php 
+                                $sumPzObiettivoNotte += ($key == 'num_pz_ora') ? $value : 0 ;
+                                endforeach; 
+                            ?>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row" colspan="3">pz./turno = <?= $sumPzObiettivoNotte; ?></th>
+                        <th scope="row" colspan="3">pz. buoni = <?= $sumPzBuoniNotte; ?></th>
+                        <th scope="row" colspan="3">pz. scarti = <?= $sumPzScartiNotte; ?></th>
+                    </tr>
+                    <tr>
+                        <th scope="row" colspan="3">efficienza = <?= $efficienzaNotte; ?>%</th>
+                        <th scope="row" colspan="3">qualità = <?= $qualitaNotte; ?>%</th>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+        </div>
+    </main>
+
+    <?php
+        include "footer.php";
+    ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

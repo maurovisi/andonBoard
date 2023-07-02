@@ -62,80 +62,90 @@ if (!isset($_SESSION['loggedin']) || !$_SESSION['loggedin']) {
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
     <script src="https://cdn.datatables.net/plug-ins/1.11.5/sorting/date-eu.js"></script>
 
+    <!-- CSS personalized -->
+    <link rel="stylesheet" href="css/stickyFooter.css">
+
 </head>
-<body class="bk">
-    <div class="container">
+<body class="bk d-flex flex-column h-100">
+    <header>
         <hgroup class="text-center">
             <h1 class="mt-4">Analisi dati Best</h1>
             <h5>La classifica dei migliori</h5>
-        </hgroup>        
+        </hgroup>
+    </header>
 
-        <form id="bestForm">
-            <div class="row gy-2 gx-3 my-4 align-items-center">
-                <div class="col">
-                    <label for="intervallo" class="form-label"><b>Intervallo</b></label>
-                    <select class="form-select" id="intervallo" name="intervallo">
-                        <option value="settimanale">Settimanale</option>
-                        <option value="mensile">Mensile</option>
-                        <option value="trimestrale">Trimestrale</option>
-                        <option value="semestrale">Semestrale</option>
-                        <option value="annuale">Annuale</option>
-                        <option value="tutto">Tutto</option>
-                    </select>
+    <main class="flex-shrink-0">
+        <div class="container mb-4">
+            <form id="bestForm">
+                <div class="row gy-2 gx-3 my-4 align-items-center">
+                    <div class="col">
+                        <label for="intervallo" class="form-label"><b>Intervallo</b></label>
+                        <select class="form-select" id="intervallo" name="intervallo">
+                            <option value="settimanale">Settimanale</option>
+                            <option value="mensile">Mensile</option>
+                            <option value="trimestrale">Trimestrale</option>
+                            <option value="semestrale">Semestrale</option>
+                            <option value="annuale">Annuale</option>
+                            <option value="tutto">Tutto</option>
+                        </select>
+                    </div>
+
+                    <div class="col">
+                        <label for="about" class="form-label"><b>Riguardo a</b></label>
+                        <select class="form-select" id="about" name="about">
+                            <option value="risorsa">Risorse</option>
+                            <option value="operatore">Operatori</option>
+                        </select>
+                    </div>
+
+                    <div class="col" id="yearRowBest" style="display: none;">
+                        <label for="yearBest" class="form-label"><b>Anno</b></label>
+                        <select class="form-select" id="yearBest" name="yearBest">
+                            <!-- Popolated dynamically with current year and previous 5 years -->
+                        </select>
+                    </div>
                 </div>
 
-                <div class="col">
-                    <label for="about" class="form-label"><b>Riguardo a</b></label>
-                    <select class="form-select" id="about" name="about">
-                        <option value="risorsa">Risorse</option>
-                        <option value="operatore">Operatori</option>
-                    </select>
-                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-success" data-target="data-table-best">Visualizza tabella</button>
+                </div> 
+            </form>
 
-                <div class="col" id="yearRowBest" style="display: none;">
-                    <label for="yearBest" class="form-label"><b>Anno</b></label>
-                    <select class="form-select" id="yearBest" name="yearBest">
-                        <!-- Popolated dynamically with current year and previous 5 years -->
-                    </select>
+            <div class="table-container">
+                <div id="data-table-best-container" style="display: none;">
+                    <table class="table table-striped" id="data-table-best">
+                        <thead>
+                            <tr>
+                                <th>Posizione</th>
+                                <th>Classifica</th>
+                                <th>Efficienza</th>
+                                <th>Qualità</th>
+                                <th>Pz. buoni</th>
+                                <th>Pz. scarti</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Posizione</th>
+                                <th>Classifica</th>
+                                <th>Efficienza</th>
+                                <th>Qualità</th>
+                                <th>Pz. buoni</th>
+                                <th>Pz. scarti</th>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
-            <div class="text-center">
-                <button type="button" class="btn btn-success" data-target="data-table-best">Visualizza tabella</button>
-            </div> 
-        </form>
-
-        <div class="table-container">
-            <div id="data-table-best-container" style="display: none;">
-                <table class="table table-striped" id="data-table-best">
-                    <thead>
-                        <tr>
-                            <th>Posizione</th>
-                            <th>Classifica</th>
-                            <th>Efficienza</th>
-                            <th>Qualità</th>
-                            <th>Pz. buoni</th>
-                            <th>Pz. scarti</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Posizione</th>
-                            <th>Classifica</th>
-                            <th>Efficienza</th>
-                            <th>Qualità</th>
-                            <th>Pz. buoni</th>
-                            <th>Pz. scarti</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
         </div>
+    </main>
 
-    </div>
-</div>
+    <?php
+        include "footer.php";
+    ?>
 
 
 <script>

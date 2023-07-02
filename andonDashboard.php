@@ -77,97 +77,87 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
     <script src="https://cdn.datatables.net/plug-ins/1.11.5/sorting/date-eu.js"></script>
 
+    <!-- CSS personalized -->
+    <link rel="stylesheet" href="css/stickyFooter.css">
+
 </head>
-<body class="bk">
-    <div class="container">
+<body class="bk d-flex flex-column h-100">
+    <header>
         <h1 class="mt-4 text-center">Analisi dati Andon Board</h1>
-        <form id="dataForm">
-            <div class="row gy-2 gx-3 my-4 align-items-center">
-                <div class="col">
-                    <label for="efficiency" class="form-label"><b>Efficienza</b></label>
-                    <select class="form-select" id="efficiency" name="efficiency">
-                        <option value="settimanale">Settimanale</option>
-                        <option value="mensile">Mensile</option>
-                        <option value="trimestrale">Trimestrale</option>
-                        <option value="semestrale">Semestrale</option>
-                        <option value="annuale">Annuale</option>
-                        <option value="tutto">Tutto</option>
-                    </select>
+    </header>
+    <main class="flex-shrink-0">
+        <div class="container mb-4">            
+            <form id="dataForm">
+                <div class="row gy-2 gx-3 my-4 align-items-center">
+                    <div class="col">
+                        <label for="efficiency" class="form-label"><b>Efficienza</b></label>
+                        <select class="form-select" id="efficiency" name="efficiency">
+                            <option value="settimanale">Settimanale</option>
+                            <option value="mensile">Mensile</option>
+                            <option value="trimestrale">Trimestrale</option>
+                            <option value="semestrale">Semestrale</option>
+                            <option value="annuale">Annuale</option>
+                            <option value="tutto">Tutto</option>
+                        </select>
+                    </div>
+
+                    <div class="col">
+                        <label for="what" class="form-label"><b>Di Cosa</b></label>
+                        <select class="form-select" id="what" name="what">
+                            <option value="risorsa">Risorsa</option>
+                            <option value="operatore">Operatore</option>
+                        </select>
+                    </div>
+
+                    <div class="col">
+                        <label for="resources" class="form-label"><b>Risorse</b></label>
+                        <select class="form-select" id="resources" name="resources">
+                            <!-- Popolated dynamically based on the choice in the "Di Cosa" select -->
+                        </select>
+                    </div>
+                </div>
+                <div class="row gy-2 gx-3 my-4 align-items-center">
+                    <div class="col" id="startingPoint" style="display:none">
+                        <label for="start" class="form-label"><b>Mese o Inizio da...</b></label>
+                        <select class="form-select" id="start" name="start">
+                            <option value="01">Gennaio</option>
+                            <option value="02">Febbraio</option>
+                            <option value="03">Marzo</option>
+                            <option value="04">Aprile</option>
+                            <option value="05">Maggio</option>
+                            <option value="06">Giugno</option>
+                            <option value="07">Luglio</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Settembre</option>
+                            <option value="10">Ottobre</option>
+                            <option value="11">Novembre</option>
+                            <option value="12">Dicembre</option>
+                        </select>
+                    </div>
+                    <div class="col" id="yearRow" style="display:none">
+                        <label for="year" class="form-label"><b>Anno</b></label>
+                        <select class="form-select" id="year" name="year">
+                            <!-- Popolated dynamically with current year and previous 5 years -->
+                        </select>
+                    </div>
                 </div>
 
-                <div class="col">
-                    <label for="what" class="form-label"><b>Di Cosa</b></label>
-                    <select class="form-select" id="what" name="what">
-                        <option value="risorsa">Risorsa</option>
-                        <option value="operatore">Operatore</option>
-                    </select>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary" data-target="bootstrap-table">Visualizza tabella Con Parziali</button>
+                    <button type="button" class="btn btn-info" data-target="data-table">Visualizza tabella per Export</button>
                 </div>
-
-                <div class="col">
-                    <label for="resources" class="form-label"><b>Risorse</b></label>
-                    <select class="form-select" id="resources" name="resources">
-                        <!-- Popolated dynamically based on the choice in the "Di Cosa" select -->
-                    </select>
+                <div class="text-center mt-4">
+                    <a href="andonBest.php" target="_blank" class="btn btn-outline-success btn-sm">Vai alla Classifica Best</a>
                 </div>
-            </div>
-            <div class="row gy-2 gx-3 my-4 align-items-center">
-                <div class="col" id="startingPoint" style="display:none">
-                    <label for="start" class="form-label"><b>Mese o Inizio da...</b></label>
-                    <select class="form-select" id="start" name="start">
-                        <option value="01">Gennaio</option>
-                        <option value="02">Febbraio</option>
-                        <option value="03">Marzo</option>
-                        <option value="04">Aprile</option>
-                        <option value="05">Maggio</option>
-                        <option value="06">Giugno</option>
-                        <option value="07">Luglio</option>
-                        <option value="08">Agosto</option>
-                        <option value="09">Settembre</option>
-                        <option value="10">Ottobre</option>
-                        <option value="11">Novembre</option>
-                        <option value="12">Dicembre</option>
-                    </select>
-                </div>
-                <div class="col" id="yearRow" style="display:none">
-                    <label for="year" class="form-label"><b>Anno</b></label>
-                    <select class="form-select" id="year" name="year">
-                        <!-- Popolated dynamically with current year and previous 5 years -->
-                    </select>
-                </div>
-            </div>
+            </form>
 
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary" data-target="bootstrap-table">Visualizza tabella Bootstrap</button>
-                <button type="button" class="btn btn-info" data-target="data-table">Visualizza tabella DataTables</button>
-            </div>   
-        </form>
+            <h5 class="mt-5">Utilizzo Risorsa Totale: <span class="fw-bold" id="usoRisorsaTot"></span></h5>
+            <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"></span></h5>
+            <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span></h5>
 
-        <h5 class="mt-5">Utilizzo Risorsa Totale: <span class="fw-bold" id="usoRisorsaTot"></span></h5>
-        <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"></span></h5>
-        <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span></h5>
+            <div class="table-container">
 
-        <div class="table-container">
-
-            <table class="table table-striped mt-4" id="bootstrap-table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Ciclo</th>
-                        <th>Operatore</th>
-                        <th>TC</th>
-                        <th>Obiettivo</th>
-                        <th>Pz. Realizz.</th>
-                        <th>Pz. scarti</th>
-                        <th>Efficienza</th>
-                        <th>Qualità</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                </tbody>
-            </table>
-
-            <div id="data-table-container" style="display: none;">
-                <table class="table table-striped" id="data-table">
+                <table class="table table-striped mt-4" id="bootstrap-table">
                     <thead>
                         <tr>
                             <th>Data</th>
@@ -181,26 +171,50 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                             <th>Qualità</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="table-body">
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Data</th>
-                            <th>Ciclo</th>
-                            <th>Operatore</th>
-                            <th>TC</th>
-                            <th>Obiettivo</th>
-                            <th>Pz. Realizz.</th>
-                            <th>Pz. scarti</th>
-                            <th>Efficienza</th>
-                            <th>Qualità</th>
-                        </tr>
-                    </tfoot>
                 </table>
-            </div>
 
+                <div id="data-table-container" style="display: none;">
+                    <table class="table table-striped" id="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Ciclo</th>
+                                <th>Operatore</th>
+                                <th>TC</th>
+                                <th>Obiettivo</th>
+                                <th>Pz. Realizz.</th>
+                                <th>Pz. scarti</th>
+                                <th>Efficienza</th>
+                                <th>Qualità</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Data</th>
+                                <th>Ciclo</th>
+                                <th>Operatore</th>
+                                <th>TC</th>
+                                <th>Obiettivo</th>
+                                <th>Pz. Realizz.</th>
+                                <th>Pz. scarti</th>
+                                <th>Efficienza</th>
+                                <th>Qualità</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+            </div>
         </div>
-    </div>
+    </main>
+
+    <?php
+        include "footer.php";
+    ?>
 
     
     <script>
