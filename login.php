@@ -115,18 +115,9 @@ function generateCsrfToken() {
 									case 'andon_brother':
 										location.href = 'andon_brother.php';
 										break;
-									case 'andon_020':
-										location.href = 'andon_020.php';
-										break;
-									case 'andon_021':
-										location.href = 'andon_021.php';
-										break;
-									case 'andon_011':
-										location.href = 'andon_011.php';
-										break;
-									case 'andon_004':
-										location.href = 'andon_004.php';
-										break;
+									case 'romans':
+										location.href = 'dataInsertRomans.php';
+										break;									
 									case 'admin':
 										location.href = 'andonDashboard.php';
 										break;

@@ -182,7 +182,7 @@ try {
     $tempoMacchinaAccesaTot = 0;
     $tempoProduzioneTot = 0;
     $tempoProduzioneScartiTot = 0;
-    $tempoUtileSett_01 =446400;
+    $tempoUtileSett_01 = ($resources=="" || $resources=="" || $resources=="" || $resources=="") ? 144000 : 446400;
     $sumPzBuoni = 0;
     $sumPzScarti = 0;
     $usoRisorsaTot = 0;
@@ -208,8 +208,8 @@ try {
             $qualita_record = 0;
 
             if ($tempoCiclo != 0) {
-                //$pzMax = 28800 / $tempoCiclo;
-                $pzMax = 27000 / $tempoCiclo;
+                $orarioDiLavoro = ($resources=="" || $resources=="" || $resources=="" || $resources=="") ? 28800 : 27000;
+                $pzMax = $orarioDiLavoro / $tempoCiclo;
                 $efficienza_record = (100/$pzMax)*$totPzRealizzati;
                 $efficienzaTot += $efficienza_record;              
             } else {

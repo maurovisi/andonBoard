@@ -98,6 +98,36 @@ if (!isset($_SESSION['loggedin']) || !$_SESSION['loggedin']) {
                         </select>
                     </div>
 
+                    <div class="col">
+                        <label for="groups" class="form-label"><b>Gruppi</b></label>
+                        <select class="form-select" id="groups" name="groups">
+                            <option value="brother">Brother</option>
+                            <option value="tornitura">Tornitura</option>
+                            <option value="fresatura">Fresatura</option>
+                            <option value="medicale">Medicale</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row gy-2 gx-3 my-4 align-items-center">
+                    <div class="col" id="startingPoint" style="display:none">
+                        <label for="start" class="form-label"><b>Mese o Inizio da...</b></label>
+                        <select class="form-select" id="start" name="start">
+                            <option value="01">Gennaio</option>
+                            <option value="02">Febbraio</option>
+                            <option value="03">Marzo</option>
+                            <option value="04">Aprile</option>
+                            <option value="05">Maggio</option>
+                            <option value="06">Giugno</option>
+                            <option value="07">Luglio</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Settembre</option>
+                            <option value="10">Ottobre</option>
+                            <option value="11">Novembre</option>
+                            <option value="12">Dicembre</option>
+                        </select>
+                    </div>
+
                     <div class="col" id="yearRowBest" style="display: none;">
                         <label for="yearBest" class="form-label"><b>Anno</b></label>
                         <select class="form-select" id="yearBest" name="yearBest">
@@ -107,7 +137,7 @@ if (!isset($_SESSION['loggedin']) || !$_SESSION['loggedin']) {
                 </div>
 
                 <div class="text-center">
-                    <button type="button" class="btn btn-success" data-target="data-table-best">Visualizza tabella</button>
+                    <button type="submit" class="btn btn-success" data-target="data-table-best">Visualizza tabella</button>
                 </div> 
             </form>
 
@@ -152,6 +182,9 @@ if (!isset($_SESSION['loggedin']) || !$_SESSION['loggedin']) {
     // Ottieni il riferimento alla select dell'intervallo
     let intervalloSelect = document.getElementById("intervallo");
 
+    // Ottieni il riferimento alla row contenente la select di start
+    let startRow = document.querySelector("#startingPoint");
+
     // Aggiungi un event listener per l'evento di cambio valore della select dell'intervallo
     intervalloSelect.addEventListener("change", function() {
         // Ottieni il valore selezionato
@@ -159,8 +192,10 @@ if (!isset($_SESSION['loggedin']) || !$_SESSION['loggedin']) {
     
         // Mostra o nascondi la row di start in base al valore selezionato
         if (selectedIntervallo === "mensile" || selectedIntervallo === "trimestrale" || selectedIntervallo === "semestrale" || selectedIntervallo === "annuale") {
+            startRow.style.display = "block";
             yearRowBest.style.display = "block";
         } else {
+            startRow.style.display = "none";
             yearRowBest.style.display = "none";
         }
     });
@@ -183,7 +218,76 @@ if (!isset($_SESSION['loggedin']) || !$_SESSION['loggedin']) {
 </script>
 
 <script>
+$(document).ready(function() {
+    $('#bestForm').on('submit', function(e) {
+        e.preventDefault();
 
+        $.ajax({
+            type: "POST",
+            url: "getBest.php",
+            data: $(this).serialize(),
+            dataType: 'json', // Expect a JSON response
+            success: function(data) {
+                // Populate DataTables table with data
+                $.each(data.records, function(i, record) {
+                    let row = $('<tr>');
+                    row.append('<td>' + record.posizione + '</td>');
+                    row.append('<td>' + record.classifica + '</td>');
+                    row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
+                    row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+                    row.append('<td>' + record.pz_buoni + '</td>');
+                    row.append('<td>' + record.pz_scarti + '</td>');
+                    row.append('</tr>');
+
+                    $('#data-table-best tbody').append(row);
+                });
+
+                // Initialize DataTables
+                $('#data-table-best').DataTable({
+                    lengthMenu: [50, 100, 200, -1],
+                    buttons: [
+                        {
+                            extend: 'copy',
+                            text: 'Copy',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'excel',
+                            text: 'Excel',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: 'PDF',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'csv',
+                            text: 'CSV',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        'colvis'
+                    ]
+                }).buttons().container().appendTo('#data-table_wrapper .col-md-6:eq(0)');
+            }
+        });
+    });
+});
 </script>
 
 

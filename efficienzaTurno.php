@@ -415,7 +415,7 @@ try {
 </head>
 <body class="d-flex flex-column h-100">
     <header>
-        <h1 class="mt-4 text-center">Analisi dati turno corrente</h1>
+        <h1 class="mt-4 text-center">Analisi dati giorno corrente</h1>
     </header>
 
     <main class="flex-shrink-0">
