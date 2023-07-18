@@ -165,12 +165,18 @@ try {
         $stmt = $pdo->prepare($queryEfficiency);
         $stmt->bindParam(':operatore', $resources);
 
+
     } else {
         // errore
         echo json_encode([
             'usoRisorsaTot' => "ERRORE",
             'efficienzaTot' => "ERRORE",
             'qualitaTot' => "ERRORE",
+            'efficienzaTotaleR' => "ERRORE",
+            'totPzPossibiliDaRealizzare' => "ERRORE",
+            'pzBuoniRealizzati' => "ERRORE",
+            'totalePezziRealizzati' => "ERRORE",
+            'pzScartiRealizzati' => "ERRORE",
             'records' => "ERRORE",
         ]);
         die;
@@ -182,12 +188,17 @@ try {
     $tempoMacchinaAccesaTot = 0;
     $tempoProduzioneTot = 0;
     $tempoProduzioneScartiTot = 0;
-    $tempoUtileSett_01 = ($resources=="" || $resources=="" || $resources=="" || $resources=="") ? 144000 : 446400;
+    $tempoUtileSett_01 = ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999") ? 144000 : 446400; // se le macchine sono a Romans il tempo è diverso perchè lavorano max 8 ore x 5 gg a settimana
     $sumPzBuoni = 0;
     $sumPzScarti = 0;
     $usoRisorsaTot = 0;
     $efficienzaTot = 0;
+    $efficienzaTotaleR = 0;
     $qualitaTot = 0;
+    $totPzPossibiliDaRealizzare = 0;
+    $pzBuoniRealizzati = 0;
+    $totalePezziRealizzati = 0;
+    $pzScartiRealizzati = 0;
 
     $tempoLavorazioneUtile = 0;
     $pzMax = 0;
@@ -208,12 +219,14 @@ try {
             $qualita_record = 0;
 
             if ($tempoCiclo != 0) {
-                $orarioDiLavoro = ($resources=="" || $resources=="" || $resources=="" || $resources=="") ? 28800 : 27000;
+                $orarioDiLavoro = ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999") ? 28800 : 27000;
                 $pzMax = $orarioDiLavoro / $tempoCiclo;
                 $efficienza_record = (100/$pzMax)*$totPzRealizzati;
-                $efficienzaTot += $efficienza_record;              
+                $efficienzaTot += $efficienza_record;
+                $totPzPossibiliDaRealizzare = round(3600/$tempoCiclo, 1);          
             } else {
                 $tempoCiclo = "ERRORE";
+                $totPzPossibiliDaRealizzare = "ERRORE";
             }
             
             if ($totPzRealizzati != 0 || $totPzScarti != 0) {
@@ -222,13 +235,17 @@ try {
                 $qualitaTot += $qualita_record;
                 $usoRisorsaTot += ($totPzRealizzati + $totPzScarti) * $tempoCiclo;
             }
+
+            $pzBuoniRealizzati += $totPzRealizzati;
+            $totalePezziRealizzati += ($totPzRealizzati + $totPzScarti);
+            $pzScartiRealizzati += $totPzScarti;
             
             // Creo un array con i dettagli per ogni giorno e turno            
             $details[$n] = [
                 'totPzRealizzati' => $record['totPzRealizzati'],
                 'totPzScarti' => $record['totPzScarti'],
                 'tempo_ciclo' => $tempoCiclo,
-                'pzDaRealizzare' => $record['pzDaRealizzare'],
+                'pzDaRealizzare' => $totPzPossibiliDaRealizzare,
                 'codice_ciclo' => $record['codice_ciclo'],
                 'data_turno' => $record['data_turno'],
                 'sigla' => $record['sigla'],
@@ -263,6 +280,7 @@ try {
         }
 
         $efficienzaTot = round(($efficienzaTot / $numRecord),2,PHP_ROUND_HALF_UP);
+        $efficienzaTotaleR = round(((100/$totalePezziRealizzati)*$pzBuoniRealizzati),2,PHP_ROUND_HALF_UP);
         $qualitaTot = round(($qualitaTot / $numRecord),2,PHP_ROUND_HALF_UP);
         
         if ($tempoUtileSett_01 != "errore") {
@@ -276,7 +294,12 @@ try {
     echo json_encode([
         'usoRisorsaTot' => $usoRisorsaTot,
         'efficienzaTot' => $efficienzaTot,
+        'efficienzaTotaleR' => $efficienzaTotaleR,
         'qualitaTot' => $qualitaTot,
+        'totPzPossibiliDaRealizzare' => $totPzPossibiliDaRealizzare,
+        'pzBuoniRealizzati' => "$pzBuoniRealizzati",
+        'totalePezziRealizzati' => "$totalePezziRealizzati",
+        'pzScartiRealizzati' => "$pzScartiRealizzati",
         'records' => $details,
     ]);
 

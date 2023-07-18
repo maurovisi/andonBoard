@@ -152,8 +152,31 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
             </form>
 
             <h5 class="mt-5">Utilizzo Risorsa Totale: <span class="fw-bold" id="usoRisorsaTot"></span></h5>
+            <p>Rapporto tra il tempo massimo disponibile per far lavorare la macchina e quello in cui effettivamente ha lavorato.</p>
             <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"></span></h5>
-            <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span></h5>
+            <p>Efficienza Totale calcolata in rapporto tra il numero di pezzi max teoricamente realizzabili e quelli buoni effettivamente realizzati tenendo conto dei diversi TC per i vari pz.</p>
+            <h5>Efficienza Totale R: <span class="fw-bold" id="efficienza-totale-R"></span> | Tot pz. realizz. <span class="fw-bold" id="totalePezziRealizzati"></span> | Tot pz. buoni <span class="fw-bold" id="pzBuoniRealizzati_1"></span></h5>
+            <p>Efficienza Totale R è l'efficienza relativa rispetto a totale dei pz. realizzati in rapporto con quelli buoni (100 / (buoni + scarti) * buoni)</p>
+            <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span> | Tot pz. buoni <span class="fw-bold" id="pzBuoniRealizzati_2"></span> | Tot pz. scarti <span class="fw-bold" id="pzScartiRealizzati"></span></h5>
+
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr class="table-info">
+                        <th>Pezzo</th>
+                        <th>Obiettivo</th>
+                        <th>T.pz. Buoni</th>
+                        <th>Tpz. Scarti</th>
+                        <th>Efficienza</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+
+            <h6>Legenda:</h6>
+            <p>La lettera R dopo le voci nelle intestazioni es. "Efficienza R" indica che il dato è relativo all'intervallo temporale specifico di una serie comprendente la stessa lavorazione es. "stesso diametro e foro", che potrebbe anche non coincidere con l'intera durata del turno.</p>
+            <p>Cliccare sulla sigla operatore per visualizzare i dettagli dell'intervallo specifico della lavorazione.</p>
 
             <div class="table-container">
 
@@ -161,14 +184,15 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>Ciclo</th>
+                            <th>Lavorazione</th>
                             <th>Operatore</th>
                             <th>TC</th>
                             <th>Obiettivo</th>
                             <th>Pz. Realizz.</th>
+                            <th>Pz. buoni</th>
                             <th>Pz. scarti</th>
-                            <th>Efficienza</th>
-                            <th>Qualità</th>
+                            <th>Efficienza R</th>
+                            <th>Qualità R</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -180,14 +204,15 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                         <thead>
                             <tr>
                                 <th>Data</th>
-                                <th>Ciclo</th>
+                                <th>Lavorazione</th>
                                 <th>Operatore</th>
                                 <th>TC</th>
                                 <th>Obiettivo</th>
                                 <th>Pz. Realizz.</th>
+                                <th>Pz. buoni</th>
                                 <th>Pz. scarti</th>
-                                <th>Efficienza</th>
-                                <th>Qualità</th>
+                                <th>Efficienza R</th>
+                                <th>Qualità R</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -195,14 +220,15 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                         <tfoot>
                             <tr>
                                 <th>Data</th>
-                                <th>Ciclo</th>
+                                <th>Lavorazione</th>
                                 <th>Operatore</th>
                                 <th>TC</th>
                                 <th>Obiettivo</th>
                                 <th>Pz. Realizz.</th>
+                                <th>Pz. buoni</th>
                                 <th>Pz. scarti</th>
-                                <th>Efficienza</th>
-                                <th>Qualità</th>
+                                <th>Efficienza R</th>
+                                <th>Qualità R</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -291,7 +317,13 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                         }
                         
                         $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
+                        $('#efficienza-totale-R').text(data.efficienzaTotaleR.toFixed(2) + '%');
                         $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
+                        $('#totalePezziRealizzati').text(data.totalePezziRealizzati);
+                        $('#totPzPossibiliDaRealizzare').text(data.totPzPossibiliDaRealizzare);
+                        $('#pzBuoniRealizzati_1').text(data.pzBuoniRealizzati);
+                        $('#pzBuoniRealizzati_2').text(data.pzBuoniRealizzati);
+                        $('#pzScartiRealizzati').text(data.pzScartiRealizzati);
 
                         let lastDate = '';
                         let lastShift = '';
