@@ -81,7 +81,7 @@ try {
                 <img src="/img/logo02.png" alt="logo Bressan" width="50" height="50">                   
             </div>
             </div>
-            <form id="andon-form" class="andonForm" method="POST" target="insertdata.php">
+            <form id="andon-form" class="andonForm" method="POST" action="insertdata.php">
                 <div class="row mb-3">
                     <div class="col">
                         <label for="risorsa" class="form-label">Risorsa</label>
@@ -114,7 +114,7 @@ try {
                             <!-- I cicli verranno popolati tramite AJAX -->
                         </select>
                         <div class="invalid-feedback">
-                            Seleziona un ciclo.
+                            Seleziona una lavorazione.
                         </div>
                     </div>
                 </div>
@@ -155,6 +155,7 @@ try {
                     <div class="col">
                         <label for="num_pz" class="form-label">Num pz. ora</label>
                         <input type="number" class="form-control" id="num_pz" name="num_pz" value="0" disabled>
+                        <input type="hidden" name="numPzOra" id="numPzOra" value="0">
                     </div>
                     <div class="col">
                         <label for="pranzo" class="form-label">Pranzo</label>
@@ -208,8 +209,10 @@ try {
                 if (tempoCiclo) {
                     var numPz = Math.floor(3600 / tempoCiclo);
                     $('#num_pz').val(numPz);
+                    $('#numPzOra').val(numPz);
                 } else {
-                    $('#num_pz').val('');
+                    $('#num_pz').val('0');
+                    $('#numPzOra').val('0');
                 }
             });
 
@@ -233,24 +236,25 @@ try {
                 }
 
                 if (isValid) {
-                    let pezzi = $('input[name=num_pz]').val();
+
                     $.ajax({
                         type: "POST",
                         url: "insertdata.php",
-                        data: $(this).serialize()+'&num_pz=' + pezzi,
+                        data: $(this).serialize(),
+                        dataType: 'json', // aspettati una risposta in formato JSON
                         success: function (response) {
                             let color = "success"; // colore verde per successo
                             let buttonColor = '#3085d6'; // colore del pulsante per successo
 
-                            // Se la risposta contiene la parola "Errore", cambia il colore in rosso
-                            if (response.includes("Errore")) {
+                            if (response.status === "error") {
+                                console.error(response.detailed_message);
                                 color = "error"; // colore rosso per errore
                                 buttonColor = '#d33'; // colore del pulsante per errore
                             }
 
                             Swal.fire({
                                 icon: color,
-                                title: response,
+                                title: response.message,
                                 confirmButtonColor: buttonColor, // colore del pulsante
                                 allowOutsideClick: false // impedisce la chiusura dell'alert se si fa clic fuori
                             });

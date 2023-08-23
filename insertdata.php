@@ -1,51 +1,61 @@
 <?php
-// Connessione al database
 require_once "db_config.php";
 
 try {
     $conn = new PDO($dsn, $username, $password, $options);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $dataOdierna = date("Y-m-d");
-
-    // Verifica se esiste già un record con gli stessi dati
-    $stmt = $conn->prepare("SELECT * FROM andon_board WHERE id_risorsa = :id_risorsa AND orario = :orario AND data_turno = '".$dataOdierna."'");
-
-    // Binding dei parametri
-    $stmt->bindParam(':id_risorsa', $_POST['risorsa']);
-    $stmt->bindParam(':orario', $_POST['orario']);
-
-    // Esecuzione della query
-    $stmt->execute();
-
-    // Se esiste già un record con gli stessi dati, termina lo script
-    if ($stmt->rowCount() > 0) {
-        die("Errore: I dati inseriti sono già presenti nel database!");
+    if ($_SERVER["REQUEST_METHOD"] != "POST") {
+        throw new Exception("Invalid request method.");
     }
 
-    // Preparazione della query di inserimento
-    $stmt = $conn->prepare("INSERT INTO andon_board (id_operatore, id_risorsa, id_ciclo, codice_ciclo, orario, num_pz_ora, num_pz_realizzati, num_pz_scarti, pranzo, note) VALUES (:id_operatore, :id_risorsa, :id_ciclo, :codice_ciclo, :orario, :num_pz_ora, :num_pz_realizzati, :num_pz_scarti, :pranzo, :note)");
+    $dataOdierna = date("Y-m-d");
 
-    // Binding dei parametri
-    $stmt->bindParam(':id_operatore', $_POST['operatore']);
-    $stmt->bindParam(':id_risorsa', $_POST['risorsa']);
-    $stmt->bindParam(':id_ciclo', $_POST['ciclo']);
-    $stmt->bindParam(':codice_ciclo', NULL);
-    $stmt->bindParam(':orario', $_POST['orario']);
-    $stmt->bindParam(':num_pz_ora', $_POST['num_pz']);
-    $stmt->bindParam(':num_pz_realizzati', $_POST['pz_buoni']);
-    $stmt->bindParam(':num_pz_scarti', $_POST['pz_sbagliati']);
-    $stmt->bindParam(':pranzo', $_POST['pranzo']);
-    $stmt->bindParam(':note', $_POST['note']);
+    $id_risorsa = $_POST['risorsa'] ?? null;
+    $orario = $_POST['orario'] ?? null;
+    $id_operatore = $_POST['operatore'] ?? null;
+    $id_ciclo = $_POST['ciclo'] ?? null;
+    $num_pz_ora = $_POST['numPzOra'] ?? null;
+    $num_pz_realizzati = $_POST['pz_buoni'] ?? null;
+    $num_pz_scarti = $_POST['pz_sbagliati'] ?? null;
+    $note = $_POST['note'] ?? null;
+    $pranzoValue = (isset($_POST['pranzo']) && $_POST['pranzo'] == 'on') ? 0 : NULL;
 
-    // Esecuzione della query di inserimento
-    $stmt->execute();
+    // Verifica se tutti i campi obbligatori sono stati impostati
+    if (!$id_risorsa || !$orario || !$id_operatore || !$id_ciclo || !$num_pz_ora || !$num_pz_realizzati || !$num_pz_scarti || !$note) {
+        throw new Exception("Tutti i campi sono obbligatori. Assicurati di aver compilato tutti i campi.");
+    }
 
-    echo "Dati inseriti con successo!";
+    // Check for existing record
+    $stmt = $conn->prepare("SELECT * FROM andon_board WHERE id_risorsa = :id_risorsa AND orario = :orario AND data_turno = :data_turno");
+    $stmt->execute([':id_risorsa' => $id_risorsa, ':orario' => $orario, ':data_turno' => $dataOdierna]);
+
+    if ($stmt->rowCount() > 0) {
+        throw new Exception("I dati inseriti sono già presenti nel database!");
+    }
+
+    // Insert new record
+    $stmt = $conn->prepare("INSERT INTO andon_board (id_operatore, id_risorsa, id_ciclo, orario, num_pz_ora, num_pz_realizzati, num_pz_scarti, pranzo, note) VALUES (:id_operatore, :id_risorsa, :id_ciclo, :orario, :num_pz_ora, :num_pz_realizzati, :num_pz_scarti, :pranzo, :note)");
+
+    $stmt->execute([
+        ':id_operatore' => $id_operatore,
+        ':id_risorsa' => $id_risorsa,
+        ':id_ciclo' => $id_ciclo,
+        ':orario' => $orario,
+        ':num_pz_ora' => $num_pz_ora,
+        ':num_pz_realizzati' => $num_pz_realizzati,
+        ':num_pz_scarti' => $num_pz_scarti,
+        ':pranzo' => $pranzoValue,
+        ':note' => $note
+    ]);
+
+    echo json_encode(["status" => "success", "message" => "Dati inseriti con successo!"]);
 } catch (PDOException $e) {
-    echo "Errore: " . $e->getMessage();
+    error_log($e->getMessage());
+    echo json_encode(["status" => "error", "message" => "Errore durante l'inserimento nel database.", "detailed_message" => $e->getMessage()]);
+} catch (Exception $e) {
+    echo $e->getMessage();
+} finally {
+    $conn = null;
 }
-
-// Chiusura della connessione
-$conn = null;
 ?>

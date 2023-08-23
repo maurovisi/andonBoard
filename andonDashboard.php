@@ -149,9 +149,9 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
             </form>
 
             <h5 class="mt-5">Utilizzo Risorsa Totale: <span class="fw-bold" id="usoRisorsaTot"></span></h5>
-            <p>Rapporto tra il tempo massimo disponibile per far lavorare la macchina e quello in cui effettivamente ha lavorato.</p>
+            <p class="pb-2">Rapporto tra il tempo massimo disponibile per far lavorare la macchina e quello in cui effettivamente ha lavorato.</p>
             <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"></span></h5>
-            <p>Efficienza Totale calcolata in rapporto tra il numero di pezzi max teoricamente realizzabili e quelli buoni effettivamente realizzati tenendo conto dei diversi TC per i vari pz.</p>
+            <p class="pb-2">Efficienza Totale calcolata in rapporto tra il numero di pezzi max teoricamente realizzabili e quelli buoni effettivamente realizzati tenendo conto dei diversi TC per i vari pz.</p>
             <h5>Tot pz. realizz. <span class="fw-bold" id="totalePezziRealizzati"></span> | Tot pz. buoni <span class="fw-bold" id="pzBuoniRealizzati"></span> | Tot pz. scarti <span class="fw-bold" id="pzScartiRealizzati"></span></h5>
             <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span> | % di scarto <span class="fw-bold" id="percentualeScarto"></span></h5>
 
