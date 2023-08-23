@@ -1,0 +1,1 @@
+Se si aggiungono macchine a Romans o dipendenti a giornata bisogna andare ad aggiornare le condizioni negli if per calcolare ore di lavoro e pezzi obiettivo della pagina get_data.php

@@ -20,7 +20,7 @@ try {
 }
 
 $risorse = $pdo->query("SELECT risorsa FROM risorse")->fetchAll(PDO::FETCH_COLUMN);
-$operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COLUMN);
+$operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::FETCH_COLUMN);
 
 ?>
 <!DOCTYPE html>
@@ -146,18 +146,14 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                     <button type="submit" class="btn btn-primary" data-target="bootstrap-table">Visualizza tabella Con Parziali</button>
                     <button type="button" class="btn btn-info" data-target="data-table">Visualizza tabella per Export</button>
                 </div>
-                <div class="text-center mt-4">
-                    <a href="andonBest.php" target="_blank" class="btn btn-outline-success btn-sm">Vai alla Classifica Best</a>
-                </div>
             </form>
 
             <h5 class="mt-5">Utilizzo Risorsa Totale: <span class="fw-bold" id="usoRisorsaTot"></span></h5>
             <p>Rapporto tra il tempo massimo disponibile per far lavorare la macchina e quello in cui effettivamente ha lavorato.</p>
             <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"></span></h5>
             <p>Efficienza Totale calcolata in rapporto tra il numero di pezzi max teoricamente realizzabili e quelli buoni effettivamente realizzati tenendo conto dei diversi TC per i vari pz.</p>
-            <h5>Efficienza Totale R: <span class="fw-bold" id="efficienza-totale-R"></span> | Tot pz. realizz. <span class="fw-bold" id="totalePezziRealizzati"></span> | Tot pz. buoni <span class="fw-bold" id="pzBuoniRealizzati_1"></span></h5>
-            <p>Efficienza Totale R è l'efficienza relativa rispetto a totale dei pz. realizzati in rapporto con quelli buoni (100 / (buoni + scarti) * buoni)</p>
-            <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span> | Tot pz. buoni <span class="fw-bold" id="pzBuoniRealizzati_2"></span> | Tot pz. scarti <span class="fw-bold" id="pzScartiRealizzati"></span></h5>
+            <h5>Tot pz. realizz. <span class="fw-bold" id="totalePezziRealizzati"></span> | Tot pz. buoni <span class="fw-bold" id="pzBuoniRealizzati"></span> | Tot pz. scarti <span class="fw-bold" id="pzScartiRealizzati"></span></h5>
+            <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span> | % di scarto <span class="fw-bold" id="percentualeScarto"></span></h5>
 
             <table class="table table-striped table-hover">
                 <thead>
@@ -175,7 +171,7 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
             </table>
 
             <h6>Legenda:</h6>
-            <p>La lettera R dopo le voci nelle intestazioni es. "Efficienza R" indica che il dato è relativo all'intervallo temporale specifico di una serie comprendente la stessa lavorazione es. "stesso diametro e foro", che potrebbe anche non coincidere con l'intera durata del turno.</p>
+            <p>La lettera T dopo le voci nelle intestazioni es. "Efficienza T" indica l'efficienza complessiva del turno di lavoro. Se ad es. una persona ha lavorato 4 ore durante le quali ha ottenuto un'efficienza del 100% qui risulterà 50% perchè complessivamente nel turno quello è stato il suo rendimento. Se una persona durante il turno, ha effettuato lavorazioni diverse, l'efficienza complessiva sarà la somma delle parziali ognuna su una riga diversa della tabella, ma con medesimo codice operatore.</p>
             <p>Cliccare sulla sigla operatore per visualizzare i dettagli dell'intervallo specifico della lavorazione.</p>
 
             <div class="table-container">
@@ -191,8 +187,8 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                             <th>Pz. Realizz.</th>
                             <th>Pz. buoni</th>
                             <th>Pz. scarti</th>
-                            <th>Efficienza R</th>
-                            <th>Qualità R</th>
+                            <th>Efficienza T</th>
+                            <th>Qualità T</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -211,8 +207,8 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                                 <th>Pz. Realizz.</th>
                                 <th>Pz. buoni</th>
                                 <th>Pz. scarti</th>
-                                <th>Efficienza R</th>
-                                <th>Qualità R</th>
+                                <th>Efficienza T</th>
+                                <th>Qualità T</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -227,8 +223,8 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                                 <th>Pz. Realizz.</th>
                                 <th>Pz. buoni</th>
                                 <th>Pz. scarti</th>
-                                <th>Efficienza R</th>
-                                <th>Qualità R</th>
+                                <th>Efficienza T</th>
+                                <th>Qualità T</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -317,13 +313,13 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                         }
                         
                         $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
-                        $('#efficienza-totale-R').text(data.efficienzaTotaleR.toFixed(2) + '%');
+                        //$('#efficienza-totale-R').text(data.efficienzaTotaleR.toFixed(2) + '%');
                         $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
                         $('#totalePezziRealizzati').text(data.totalePezziRealizzati);
                         $('#totPzPossibiliDaRealizzare').text(data.totPzPossibiliDaRealizzare);
-                        $('#pzBuoniRealizzati_1').text(data.pzBuoniRealizzati);
-                        $('#pzBuoniRealizzati_2').text(data.pzBuoniRealizzati);
+                        $('#pzBuoniRealizzati').text(data.pzBuoniRealizzati);
                         $('#pzScartiRealizzati').text(data.pzScartiRealizzati);
+                        $('#percentualeScarto').text((100 - data.qualitaTot).toFixed(2) + '%');
 
                         let lastDate = '';
                         let lastShift = '';
@@ -362,9 +358,9 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                                 }
                                                                     
                                 let row1 = $('<tr>');
-                                row1.append('<td colspan="4">Efficienza turno = ' + efficienzaTurno + '%</td>');
-                                row1.append('<td colspan="4">Qualità turno = ' + qualitaTurno + '%</td>');
-                                row1.append('<td></td></tr>');
+                                row1.append('<td colspan="5">Efficienza turno = ' + efficienzaTurno + '%</td>');
+                                row1.append('<td colspan="5">Qualità turno = ' + qualitaTurno + '%</td>');
+                                row1.append('</tr>');
                                 $('#table-body').append(row1);
 
                                 efficienzaTurno = efficienzaParsificata;
@@ -379,8 +375,9 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                             row.append('<td>' + record.codice_ciclo + '</td>');
                             row.append('<td><a href="dettagliOperatore.php?sigla=' + record.sigla + '&data=' + record.data_turno + '&codCiclo=' + record.codice_ciclo + '" target="_blank">' + record.sigla + '</a></td>');
                             row.append('<td>' + record.tempo_ciclo + '</td>');
-                            row.append('<td>' + record.pzDaRealizzare + '</td>');
-                            row.append('<td>' + record.totPzRealizzati + '</td>');
+                            row.append('<td>' + record.pzObiettivo.toFixed(1) + '</td>');
+                            row.append('<td>' + record.sommaTotPzRealizzati + '</td>');
+                            row.append('<td>' + record.totPzBuoni + '</td>');
                             row.append('<td>' + record.totPzScarti + '</td>');
                             row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
                             row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
@@ -396,9 +393,9 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                                 }
                                     
                                 let row2 = $('<tr>');
-                                row2.append('<td colspan="4">Efficienza turno = ' + efficienzaTurno.toFixed(2) + '%</td>');
-                                row2.append('<td colspan="4">Qualità turno = ' + qualitaTurno.toFixed(2) + '%</td>');
-                                row2.append('<td></td></tr>');
+                                row2.append('<td colspan="5">Efficienza turno = ' + efficienzaTurno.toFixed(2) + '%</td>');
+                                row2.append('<td colspan="5">Qualità turno = ' + qualitaTurno.toFixed(2) + '%</td>');
+                                row2.append('</tr>');
                                 $('#table-body').append(row2);
                             }
 
@@ -420,8 +417,9 @@ $operatori = $pdo->query("SELECT sigla FROM operatori")->fetchAll(PDO::FETCH_COL
                             row.append('<td>' + record.codice_ciclo + '</td>');
                             row.append('<td><a href="dettagliOperatore.php?sigla=' + record.sigla + '&data=' + record.data_turno + '&codCiclo=' + record.codice_ciclo + '" target="_blank">' + record.sigla + '</a></td>');
                             row.append('<td>' + record.tempo_ciclo + '</td>');
-                            row.append('<td>' + record.pzDaRealizzare + '</td>');
-                            row.append('<td>' + record.totPzRealizzati + '</td>');
+                            row.append('<td>' + record.pzObiettivo.toFixed(1) + '</td>');
+                            row.append('<td>' + record.sommaTotPzRealizzati + '</td>');
+                            row.append('<td>' + record.totPzBuoni + '</td>');
                             row.append('<td>' + record.totPzScarti + '</td>');
                             row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
                             row.append('<td>' + record.qualita.toFixed(2) + '%</td>');

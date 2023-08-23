@@ -24,12 +24,13 @@ try {
     }
 
     // Preparazione della query di inserimento
-    $stmt = $conn->prepare("INSERT INTO andon_board (id_operatore, id_risorsa, id_ciclo, orario, num_pz_ora, num_pz_realizzati, num_pz_scarti, pranzo, note) VALUES (:id_operatore, :id_risorsa, :id_ciclo, :orario, :num_pz_ora, :num_pz_realizzati, :num_pz_scarti, :pranzo, :note)");
+    $stmt = $conn->prepare("INSERT INTO andon_board (id_operatore, id_risorsa, id_ciclo, codice_ciclo, orario, num_pz_ora, num_pz_realizzati, num_pz_scarti, pranzo, note) VALUES (:id_operatore, :id_risorsa, :id_ciclo, :codice_ciclo, :orario, :num_pz_ora, :num_pz_realizzati, :num_pz_scarti, :pranzo, :note)");
 
     // Binding dei parametri
     $stmt->bindParam(':id_operatore', $_POST['operatore']);
     $stmt->bindParam(':id_risorsa', $_POST['risorsa']);
     $stmt->bindParam(':id_ciclo', $_POST['ciclo']);
+    $stmt->bindParam(':codice_ciclo', NULL);
     $stmt->bindParam(':orario', $_POST['orario']);
     $stmt->bindParam(':num_pz_ora', $_POST['num_pz']);
     $stmt->bindParam(':num_pz_realizzati', $_POST['pz_buoni']);

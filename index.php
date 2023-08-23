@@ -24,8 +24,8 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Query per ottenere i dati per le select
-    $risorse = $conn->query("SELECT id, risorsa FROM risorse");
-    $operatori_query = $conn->query("SELECT id, sigla FROM operatori ORDER by sigla");
+    $risorse = $conn->query("SELECT id, risorsa FROM risorse WHERE place = 'cormons' ORDER by risorsa");
+    $operatori_query = $conn->query("SELECT id, sigla FROM operatori WHERE place = 'cormons' ORDER by sigla");
     //$cicli = $conn->query("SELECT id_ciclo, codice_ciclo, tempo_ciclo FROM cicli WHERE attivo = 1 ORDER BY codice_ciclo")->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {

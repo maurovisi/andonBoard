@@ -24,7 +24,7 @@ $dataTurno      = isset($_GET['data']) ? $_GET['data'] : NULL;
 $codiceCiclo    = isset($_GET['codCiclo']) ? $_GET['codCiclo'] : NULL;
 
 /* parte relativa ai dettagli selezionati */
-$query = "SELECT o.sigla, c.codice_ciclo, c.tempo_ciclo, c.pzDaRealizzare, a.id_risorsa, r.risorsa, a.id_operatore, a.id_ciclo, a.num_pz_ora, a.num_pz_realizzati, a.orario, a.num_pz_scarti, a.pranzo, a.note, a.data_turno
+$query = "SELECT o.sigla, c.codice_ciclo, c.tempo_ciclo, a.id_risorsa, r.risorsa, a.id_operatore, a.id_ciclo, a.num_pz_ora, a.num_pz_realizzati, a.orario, a.num_pz_scarti, a.pranzo, a.note, a.data_turno
           FROM andon_board AS a
             INNER JOIN cicli AS c ON a.id_ciclo = c.id_ciclo
             INNER JOIN operatori AS o ON a.id_operatore = o.id
@@ -148,26 +148,28 @@ if ($numRecord > 0) {
                             <th>Sigla Operatore</th>
                             <th>Codice Ciclo</th>
                             <th>Tempo Ciclo</th>
-                            <th>Pezzi da Realizzare</th>
                             <th>Risorsa</th>
                             <th>Pezzi per Ora</th>
-                            <th>Pezzi Realizzati</th>                        
+                            <th>Pezzi Realizzati</th>
+                            <th>Pezzi Buoni</th>                      
                             <th>Pezzi Scarti</th>
                             <th>Pranzo</th>
                             <th>Note</th>                        
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($result as $record) : ?>
+                        <?php foreach ($result as $record) :
+                            $sommaTotPzRealizzati = $record['num_pz_realizzati'] + $record['num_pz_scarti'];
+                        ?>
                             <tr>
                                 <td><?php echo $record['data_turno']; ?></td>
                                 <td><?php echo $record['orario']; ?></td>
                                 <td><?php echo $record['sigla']; ?></td>
                                 <td><?php echo $record['codice_ciclo']; ?></td>
                                 <td><?php echo $record['tempo_ciclo']; ?></td>
-                                <td><?php echo $record['pzDaRealizzare']; ?></td>
                                 <td><?php echo $record['risorsa']; ?></td>
                                 <td><?php echo $record['num_pz_ora']; ?></td>
+                                <td><?php echo $sommaTotPzRealizzati; ?></td> 
                                 <td><?php echo $record['num_pz_realizzati']; ?></td>                            
                                 <td><?php echo $record['num_pz_scarti']; ?></td>
                                 <td><?php echo $record['pranzo'] !== NULL ? 'YES' : '-'; ?></td>

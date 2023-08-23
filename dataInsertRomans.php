@@ -13,8 +13,8 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Query per ottenere i dati per le select
-    $risorse = $conn->query("SELECT id, risorsa FROM risorse");
-    $operatori_query = $conn->query("SELECT id, sigla FROM operatori ORDER by sigla");
+    $risorse = $conn->query("SELECT id, risorsa FROM risorse WHERE place = 'romans' ORDER by risorsa");
+    $operatori_query = $conn->query("SELECT id, sigla FROM operatori WHERE place = 'romans' ORDER by sigla");
     //$cicli = $conn->query("SELECT id_ciclo, codice_ciclo, tempo_ciclo FROM cicli WHERE attivo = 1 ORDER BY codice_ciclo")->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
@@ -96,7 +96,7 @@ try {
                             Seleziona un operatore.
                         </div>
                     </div>
-                    <div class="col">
+                    <div class="col" id="campoCiclo">
                         <label for="ciclo" class="form-label">Ciclo</label>
                         <select class="form-select" name="ciclo" id="ciclo">
                             <option value="">Seleziona</option>
@@ -112,61 +112,60 @@ try {
                         <label for="orario" class="form-label">Orario</label>
                         <select class="form-select" id="orario" name="orario" required>
                             <option value="">Selezionare</option>
-                            <option value="6-7">06:00 - 07:00</option>
-                            <option value="7-8">07:00 - 08:00</option>
-                            <option value="8-9">08:00 - 09:00</option>
-                            <option value="9-10">09:00 - 10:00</option>
-                            <option value="10-11">10:00 - 11:00</option>
-                            <option value="11-12">11:00 - 12:00</option>
-                            <option value="12-13">12:00 - 13:00</option>
-                            <option value="13-14">13:00 - 14:00</option>
-                            <option value="14-15">14:00 - 15:00</option>
-                            <option value="15-16">15:00 - 16:00</option>
-                            <option value="16-17">16:00 - 17:00</option>
-                            <option value="17-18">17:00 - 18:00</option>
-                            <option value="18-19">18:00 - 19:00</option>
-                            <option value="19-20">19:00 - 20:00</option>
-                            <option value="20-21">20:00 - 21:00</option>
-                            <option value="21-22">21:00 - 22:00</option>
-                            <option value="22-23">22:00 - 23:00</option>
-                            <option value="23-24">23:00 - 24:00</option>
-                            <option value="24-1">24:00 - 01:00</option>
-                            <option value="1-2">01:00 - 02:00</option>
-                            <option value="2-3">02:00 - 03:00</option>
-                            <option value="3-4">03:00 - 04:00</option>
-                            <option value="4-5">04:00 - 05:00</option>
-                            <option value="5-6">05:00 - 06:00</option>
+                            <option value="daily">Giornaliero</option>
                         </select>
                         <div class="invalid-feedback">
-                            Seleziona un orario.
+                            Seleziona un intervallo di tempo.
                         </div>
                     </div>
                     <div class="col">
-                        <label for="num_pz" class="form-label">Num pz. ora</label>
+                        <label for="num_pz" class="form-label">Num pz.</label>
                         <input type="number" class="form-control" id="num_pz" name="num_pz" value="0" disabled>
                     </div>
-                    <div class="col">
-                        <label for="pranzo" class="form-label">Pranzo</label>
+                    <div class="col" id="campoPranzo">
+                        <label for="pranzo" class="form-label">Non a Giornata</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="pranzo" name="pranzo">
+                            <input class="form-check-input" type="checkbox" id="notDaily" name="notDaily">
                             <label class="form-check-label" for="pranzo">Pranzo</label>
                         </div>
                     </div>
                 </div>
-                <div class="row mb-3">
+                <div class="row mb-3" id="pzRow">
                     <div class="col-6 text-center">
                         <label for="pz_buoni" class="form-label">Pz. buoni</label>
-                        <input type="number" class="form-control" id="pz_buoni" name="pz_buoni" value="0" min="0" required>
+                        <input type="number" class="form-control" id="pz_buoni" name="pz_buoni" value="0" min="0">
                         <div class="invalid-feedback">
                             Inserisci pz buoni.
                         </div>
                     </div>
                     <div class="col-6 text-center">
                         <label for="pz_sbagliati" class="form-label">Pz. sbagliati</label>
-                        <input type="number" class="form-control" id="pz_sbagliati" name="pz_sbagliati" value="0" min="0" required>
+                        <input type="number" class="form-control" id="pz_sbagliati" name="pz_sbagliati" value="0" min="0">
                         <div class="invalid-feedback">
                             Inserisci pz sbagliati.
                         </div>
+                    </div>
+                </div>
+                <div class="row mb-3" id="cicloRow" style="display: none;">
+                    <div class="col">
+                        <label for="cicloInsert" class="form-label">Ciclo</label>
+                        <input type="text" class="form-control" id="cicloInsert" name="cicloInsert">
+                        <div class="invalid-feedback">
+                            Inserisci il ciclo.
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label for="num_pz_tagliati" class="form-label">N. pz. tagliati</label>
+                        <input type="number" class="form-control" id="num_pz_tagliati" name="num_pz_tagliati" value="0" min="0">
+                        <div class="invalid-feedback">
+                            Inserisci il numero di pezzi tagliati.
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3" id="pezziMontatiRow" style="display: none;">
+                    <div class="col">
+                        <label for="pezziMontati" class="form-label">Pezzi montati</label>
+                        <input type="number" class="form-control" id="pezziMontati" name="pezziMontati" value="0" min="0">
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -175,6 +174,7 @@ try {
                         <textarea class="form-control" id="note" name="note" rows="3"></textarea>
                     </div>
                 </div>
+                <div class="row"><input type="hidden" name="checkValidation" id="checkValidation" value="1"></div>
                 <div class="row">
                     <div class="col-12 text-center">
                         <button type="submit" class="btn btn-primary btn-lg mx-2 px-4">Invio</button>
@@ -189,24 +189,89 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        $('#risorsa').on('change', function () {            
+            let risorsaId = $("#risorsa option:selected").text();
+            if (risorsaId) {
+                let cicloRow = $('#cicloRow');
+                let pzRow = $('#pzRow');
+                let pezziMontatiRow = $('#pezziMontatiRow');
+                let campoCiclo = $('#campoCiclo');
+                let validation = $('#checkValidation');
+
+                if (risorsaId === '012' || risorsaId === '015' || risorsaId === '023') {
+                    cicloRow.hide();
+                    pzRow.show();
+                    pezziMontatiRow.hide();
+                    validation.val('2');                    
+                } else if (risorsaId === '999') {
+                    cicloRow.hide();
+                    pzRow.hide();
+                    pezziMontatiRow.show();
+                    validation.val('3');
+                } else {
+                    cicloRow.show();
+                    pzRow.hide();
+                    pezziMontatiRow.hide();
+                    validation.val('4');
+                }
+
+                $.get('get_cicli.php', {id: risorsaId}, function (data) {
+                    let cicli = JSON.parse(data);
+                    let cicloSelect = $('#ciclo');
+                    cicloSelect.empty();
+                    cicloSelect.append('<option value="">Seleziona</option>');
+                    cicli.forEach(function (ciclo) {
+                        cicloSelect.append('<option value="' + ciclo.id_ciclo + '" data-tempo-ciclo="' + ciclo.tempo_ciclo + '">' + ciclo.codice_ciclo + '</option>');
+                    });
+                });
+            } else {
+                $('#ciclo').empty();
+                $('#ciclo').append('<option value="">Seleziona</option>');
+            }            
+        });
+    </script>
+
+    <script>
         $(document).ready(function () {
+            $('#operatore').on('change', function () {
+                let operatore = $("#operatore option:selected").text();
+
+                if (operatore) {
+                    let campoPranzoVisibility = $('#campoPranzo');
+                    if (operatore === 'GS' || operatore === 'SM') {
+                        campoPranzoVisibility.hide();
+                    } else {
+                        campoPranzoVisibility.show();
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {            
             // Calcola il valore del campo "num_pz" in base alla selezione del ciclo
             $('#ciclo').on('change', function () {
                 var selectedOption = $('option:selected', this);
                 var tempoCiclo = parseInt(selectedOption.attr('data-tempo-ciclo'));
-                if (tempoCiclo) {
+                if (tempoCiclo && tempoCiclo != 0) {
                     var numPz = Math.floor(3600 / tempoCiclo);
                     $('#num_pz').val(numPz);
                 } else {
-                    $('#num_pz').val('');
+                    $('#num_pz').val(0);
                 }
             });
-
+            
             // Controllo campi obbligatori e invio form
             $('#andon-form').on('submit', function (e) {
                 e.preventDefault();
 
+                let pezziMontati = $('#pezziMontati');
+                let cicloInsert = $('#cicloInsert');
+                let num_pz_tagliati = $('#num_pz_tagliati');
+                let validation = $('#checkValidation').val();
                 let isValid = true;
+
                 $('.error-message').remove();
 
                 $('select').each(function () {
@@ -216,17 +281,36 @@ try {
                     }
                 });
 
-                if ($('#pz_buoni').val() === '' || $('#pz_scartati').val() === '') {
-                    isValid = false;
-                    $('#pz_buoni, #pz_scartati').after('<p class="error-message" style="color: darkred; font-size: smaller;">Campo obbligatorio</p>');
-                }
+                if (validation == '2') {
+                    // macchine utensile
+                    if ($('#pz_buoni').val() === '' || $('#pz_sbagliati').val() === '') {
+                        isValid = false;
+                        $('#pz_buoni').after('<p class="error-message" style="color: darkred; font-size: smaller;">Campo obbligatorio</p>');
+                    }                   
+                } else if(validation == '3') {
+                    // montaggio
+                    if (pezziMontati.val() == 0) {
+                        isValid = false;
+                        pezziMontati.after('<p class="error-message" style="color: darkred; font-size: smaller;">Inserire num. pz. montati</p>');
+                    }
+                } else if(validation == '4') {
+                    // seghe
+                    if (cicloInsert.val() === '') {
+                        isValid = false;
+                        cicloInsert.after('<p class="error-message" style="color: darkred; font-size: smaller;">Inserire ciclo</p>');
+                    }
+
+                    if (num_pz_tagliati.val() == 0) {
+                        isValid = false;
+                        num_pz_tagliati.after('<p class="error-message" style="color: darkred; font-size: smaller;">Inserire num. pz. tagliati</p>');
+                    }
+                }   
 
                 if (isValid) {
-                    let pezzi = $('input[name=num_pz]').val();
                     $.ajax({
                         type: "POST",
-                        url: "insertdata.php",
-                        data: $(this).serialize()+'&num_pz=' + pezzi,
+                        url: "insertdataRomans.php",
+                        data: $(this).serialize(),
                         success: function (response) {
                             let color = "success"; // colore verde per successo
                             let buttonColor = '#3085d6'; // colore del pulsante per successo
@@ -255,30 +339,10 @@ try {
                             });
                         }
                     });
-
                 }
             });
         });
     </script>
-
-    <script>
-        $('#risorsa').on('change', function () {
-            let risorsaId = $("#risorsa option:selected").text();
-            if (risorsaId) {
-                $.get('get_cicli.php', {id: risorsaId}, function (data) {
-                    let cicli = JSON.parse(data);
-                    let cicloSelect = $('#ciclo');
-                    cicloSelect.empty();
-                    cicloSelect.append('<option value="">Seleziona</option>');
-                    cicli.forEach(function (ciclo) {
-                        cicloSelect.append('<option value="' + ciclo.id_ciclo + '" data-tempo-ciclo="' + ciclo.tempo_ciclo + '">' + ciclo.codice_ciclo + '</option>');
-                    });
-                });
-            } else {
-                $('#ciclo').empty();
-                $('#ciclo').append('<option value="">Seleziona</option>');
-            }
-        });
-    </script>
+    
 </body>
 </html>

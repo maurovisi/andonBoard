@@ -69,7 +69,7 @@ try {
 
     if ($efficiency == "settimanale" && $what == "risorsa") {
 
-        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, COUNT(*) AS oreLavoro
+        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
                             FROM
                                 andon_board AS ab
                                 INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
@@ -86,7 +86,7 @@ try {
 
     } elseif (($efficiency == "mensile" || $efficiency == "trimestrale" || $efficiency == "semestrale" || $efficiency == "annuale") && $what == "risorsa") {
 
-        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, COUNT(*) AS oreLavoro
+        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
                             FROM
                                 andon_board AS ab
                                 INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
@@ -103,7 +103,7 @@ try {
 
     } elseif ($efficiency == "tutto" && $what == "risorsa") {
         
-        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, COUNT(*) AS oreLavoro
+        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
                             FROM
                                 andon_board AS ab
                                 INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
@@ -118,7 +118,7 @@ try {
 
     } elseif ($efficiency == "settimanale" && $what == "operatore") {
         
-        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, COUNT(*) AS oreLavoro
+        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
                             FROM
                                 andon_board AS ab
                                 INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
@@ -135,7 +135,7 @@ try {
 
     } elseif (($efficiency == "mensile" || $efficiency == "trimestrale" || $efficiency == "semestrale" || $efficiency == "annuale") && $what == "operatore") {
         
-        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, COUNT(*) AS oreLavoro
+        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
                             FROM
                                 andon_board AS ab
                                 INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
@@ -152,7 +152,7 @@ try {
 
     } elseif ($efficiency == "tutto" && $what == "operatore") {
         
-        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, COUNT(*) AS oreLavoro
+        $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
                             FROM
                                 andon_board AS ab
                                 INNER JOIN cicli ON ab.id_ciclo = cicli.id_ciclo
@@ -196,9 +196,12 @@ try {
     $efficienzaTotaleR = 0;
     $qualitaTot = 0;
     $totPzPossibiliDaRealizzare = 0;
+    $AllTotPzPossibiliDaRealizzare = 0;
     $pzBuoniRealizzati = 0;
     $totalePezziRealizzati = 0;
     $pzScartiRealizzati = 0;
+    $pzObiettivo = 0;
+    $sommaTotPzRealizzati = 0;
 
     $tempoLavorazioneUtile = 0;
     $pzMax = 0;
@@ -219,11 +222,12 @@ try {
             $qualita_record = 0;
 
             if ($tempoCiclo != 0) {
-                $orarioDiLavoro = ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999") ? 28800 : 27000;
+                $orarioDiLavoro = ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999" || $resources=="GS" || $resources=="SM") ? 28800 : 27000;
                 $pzMax = $orarioDiLavoro / $tempoCiclo;
                 $efficienza_record = (100/$pzMax)*$totPzRealizzati;
                 $efficienzaTot += $efficienza_record;
-                $totPzPossibiliDaRealizzare = round(3600/$tempoCiclo, 1);          
+                $totPzPossibiliDaRealizzare = round(3600/$tempoCiclo, 1); 
+                $AllTotPzPossibiliDaRealizzare += $totPzPossibiliDaRealizzare;
             } else {
                 $tempoCiclo = "ERRORE";
                 $totPzPossibiliDaRealizzare = "ERRORE";
@@ -232,6 +236,7 @@ try {
             if ($totPzRealizzati != 0 || $totPzScarti != 0) {
                 //$qualita_record = ($totPzRealizzati / ($totPzRealizzati + $totPzScarti)) * 100;
                 $qualita_record = 100 - ($totPzScarti / ($totPzRealizzati + $totPzScarti)) * 100;
+                //$qualita_record = (100/($totPzRealizzati + $totPzScarti))*$totPzRealizzati;
                 $qualitaTot += $qualita_record;
                 $usoRisorsaTot += ($totPzRealizzati + $totPzScarti) * $tempoCiclo;
             }
@@ -239,10 +244,25 @@ try {
             $pzBuoniRealizzati += $totPzRealizzati;
             $totalePezziRealizzati += ($totPzRealizzati + $totPzScarti);
             $pzScartiRealizzati += $totPzScarti;
+
+            if ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999" || $resources=="GS" || $resources=="SM") {
+                $pzObiettivo = 3600*$record['oreLavoro']/$tempoCiclo; //$pzObiettivo = $totPzPossibiliDaRealizzare * $record['oreLavoro'];
+            } else {
+                if ($record['pranzo'] === NULL) {
+                    $pzObiettivo = 3600*$record['oreLavoro']/$tempoCiclo; //$pzObiettivo = $totPzPossibiliDaRealizzare * $record['oreLavoro'];
+                } else {
+                    $pzObiettivo = (3600*($record['oreLavoro']-1)+1800)/$tempoCiclo; //$pzObiettivo = ($totPzPossibiliDaRealizzare * ($record['oreLavoro'] - 1)) + ($totPzPossibiliDaRealizzare / 2);
+                }
+            }
+            
+            $sommaTotPzRealizzati = $totPzRealizzati + $totPzScarti;
             
             // Creo un array con i dettagli per ogni giorno e turno            
             $details[$n] = [
+                'pzObiettivo' => $pzObiettivo,
+                'sommaTotPzRealizzati' => $sommaTotPzRealizzati,
                 'totPzRealizzati' => $record['totPzRealizzati'],
+                'totPzBuoni' => $record['totPzRealizzati'],
                 'totPzScarti' => $record['totPzScarti'],
                 'tempo_ciclo' => $tempoCiclo,
                 'pzDaRealizzare' => $totPzPossibiliDaRealizzare,
@@ -280,8 +300,10 @@ try {
         }
 
         $efficienzaTot = round(($efficienzaTot / $numRecord),2,PHP_ROUND_HALF_UP);
-        $efficienzaTotaleR = round(((100/$totalePezziRealizzati)*$pzBuoniRealizzati),2,PHP_ROUND_HALF_UP);
-        $qualitaTot = round(($qualitaTot / $numRecord),2,PHP_ROUND_HALF_UP);
+        //$efficienzaTotaleR = round(((100/$totalePezziRealizzati)*$pzBuoniRealizzati),2,PHP_ROUND_HALF_UP);
+        //$efficienzaTotaleR = round((($totalePezziRealizzati/$AllTotPzPossibiliDaRealizzare)*100),2,PHP_ROUND_HALF_UP);
+        //$qualitaTot = round(($qualitaTot / $numRecord),2,PHP_ROUND_HALF_UP);
+        $qualitaTot  = round((($pzBuoniRealizzati/$totalePezziRealizzati)*100),2,PHP_ROUND_HALF_UP);
         
         if ($tempoUtileSett_01 != "errore") {
             $usoRisorsaTot = round(((100 / $tempoUtileSett_01) * $usoRisorsaTot),2,PHP_ROUND_HALF_UP);
