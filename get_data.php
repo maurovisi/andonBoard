@@ -202,7 +202,7 @@ try {
     $pzScartiRealizzati = 0;
     $pzObiettivo = 0;
     $sommaTotPzRealizzati = 0;
-
+    $orarioDiLavoro = 0;
     $tempoLavorazioneUtile = 0;
     $pzMax = 0;
 
@@ -214,6 +214,48 @@ try {
     $details = [];
 
     if ($numRecord > 0) {
+
+        /* RECUPERO IL TEMPO DI LAVORO IN BASE AL TIPO DI CONTRATTO O DI MACCHINA */        
+        if ($what == "operatore") {
+
+            $queryOrario = "SELECT contract FROM operatori WHERE sigla = :sigla";
+            $stmt = $pdo->prepare($queryOrario);
+            $stmt->bindParam(':sigla', $resources);
+            $stmt->execute();
+            $dati2 = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($dati2 as $record) {
+                switch ($record["contract"]) {
+                    case 'full':
+                        $orarioDiLavoro = 27000;
+                        break;
+                    case 'giornata':
+                        $orarioDiLavoro = 28800;
+                        break;
+                    case 'partial':
+                        $orarioDiLavoro = 14400;
+                        break;
+                    
+                    default:
+                        $orarioDiLavoro = 28800;
+                        break;
+                }
+            }
+
+        } elseif ($what == "risorsa") {
+
+            if ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999") {
+                $orarioDiLavoro = 28800;
+            } else {
+                $orarioDiLavoro = 27000;
+            }
+
+        } else {
+
+            $orarioDiLavoro = 28800;
+
+        }
+        
         foreach ($dati as $record) { 
             $tempoCiclo = intval($record['tempo_ciclo']);
             $totPzRealizzati = intval($record['totPzRealizzati']);
@@ -222,7 +264,7 @@ try {
             $qualita_record = 0;
 
             if ($tempoCiclo != 0) {
-                $orarioDiLavoro = ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999" || $resources=="GS" || $resources=="SM") ? 28800 : 27000;
+                //$orarioDiLavoro = ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999" || $resources=="GS" || $resources=="SM") ? 28800 : 27000;
                 $pzMax = $orarioDiLavoro / $tempoCiclo;
                 $efficienza_record = (100/$pzMax)*$totPzRealizzati;
                 $efficienzaTot += $efficienza_record;
