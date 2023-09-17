@@ -288,7 +288,9 @@ try {
                 $efficienza_turno = 0; // non indispensabile ma diamo più ordine al codice
                 $numLavorazioniPerTurno = 1;
             } else {
-                $numLavorazioniPerTurno += 1;
+                if ($n > 0) {
+                    $numLavorazioniPerTurno += 1;
+                }                
             }
 
             if ($tempoCiclo != 0) {

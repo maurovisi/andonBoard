@@ -171,7 +171,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
             </table>
 
             <h6>Legenda:</h6>
-            <p>La lettera T dopo le voci nelle intestazioni es. "Efficienza T" indica l'efficienza complessiva del turno di lavoro. Se ad es. una persona ha lavorato 4 ore durante le quali ha ottenuto un'efficienza del 100% qui risulterà 50% perchè complessivamente nel turno quello è stato il suo rendimento. Se una persona durante il turno, ha effettuato lavorazioni diverse, l'efficienza complessiva sarà la somma delle parziali ognuna su una riga diversa della tabella, ma con medesimo codice operatore.</p>
+            <p>La lettera R dopo le voci nelle intestazioni es. "Efficienza R" indica l'efficienza relativa del turno di lavoro riferita a quella lavorazione. Se ad es. una persona ha lavorato 4 ore durante le quali ha ottenuto un'efficienza del 100% qui risulterà 50% perchè complessivamente nel turno quello è stato il suo rendimento. Se una persona durante il turno, ha effettuato lavorazioni diverse, l'efficienza complessiva sarà la somma delle parziali ognuna su una riga diversa della tabella e indicate nel riepilogo finale del turno con medesimo codice operatore.</p>
             <p>Cliccare sulla sigla operatore per visualizzare i dettagli dell'intervallo specifico della lavorazione.</p>
 
             <div class="table-container">
@@ -188,8 +188,8 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                             <th>Pz. Realizz.</th>
                             <th>Pz. buoni</th>
                             <th>Pz. scarti</th>
-                            <th>Efficienza T</th>
-                            <th>Qualità T</th>
+                            <th>Efficienza R</th>
+                            <th>Qualità R</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -209,8 +209,8 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                 <th>Pz. Realizz.</th>
                                 <th>Pz. buoni</th>
                                 <th>Pz. scarti</th>
-                                <th>Efficienza T</th>
-                                <th>Qualità T</th>
+                                <th>Efficienza R</th>
+                                <th>Qualità R</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -226,8 +226,8 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                 <th>Pz. Realizz.</th>
                                 <th>Pz. buoni</th>
                                 <th>Pz. scarti</th>
-                                <th>Efficienza T</th>
-                                <th>Qualità T</th>
+                                <th>Efficienza R</th>
+                                <th>Qualità R</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -331,6 +331,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                         $('#table-body').empty();
 
                         // Add a new row for each record
+                        let efficienzaTurno = 0;
                         let qualitaTurno = 0;
                         let dataTurnoPrec = "";
                         let m = 0;
@@ -340,12 +341,12 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
 
                         // Populate Bootstrap table
                         $.each(data.records, function(i, record) {
-                            // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno
-                            let efficienzaTurno = record.effTurno;
+                            // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno                            
                             let qualitaParsificata = parseFloat(record.qualita);
                             qualitaTurno += qualitaParsificata;
-                                
-                            if (record.data_turno != dataTurnoPrec && dataTurnoPrec != "") {
+                            
+                            /* evito di inserire il totale come prima riga mentre devo inserire quasti dati solo dopo i primi parziali */
+                            if (record.data_turno != dataTurnoPrec && nRows > 1) {
                                 // devo sottrarre il record appena sommato perchè appartiene al turno dopo, successivamente dovrò assegnare questo valore alle variabili efficienzaTurno e QualitaTurno per non perderne traccia
                                 
                                 qualitaTurno -= qualitaParsificata;
@@ -359,8 +360,15 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                 }
                                                                     
                                 let row1 = $('<tr>');
-                                row1.append('<td colspan="5">Efficienza turno = ' + efficienzaTurno + '%</td>');
-                                row1.append('<td colspan="5">Qualità turno = ' + qualitaTurno + '%</td>');
+
+                                if (efficienzaTurno <= 80) {
+                                    row1.append('<td colspan="5"><b class="text-danger">Efficienza turno = ' + efficienzaTurno + '%</b></td>');
+                                    row1.append('<td colspan="6"><b class="text-danger">Qualità turno = ' + qualitaTurno + '%</b></td>');
+                                } else {
+                                    row1.append('<td colspan="5"><b>Efficienza turno = ' + efficienzaTurno + '%</b></td>');
+                                    row1.append('<td colspan="6"><b>Qualità turno = ' + qualitaTurno + '%</b></td>');
+                                }
+                                
                                 row1.append('</tr>');
                                 $('#table-body').append(row1);
 
@@ -369,6 +377,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                             }
 
                             dataTurnoPrec = record.data_turno;
+                            efficienzaTurno = record.effTurno;
                             
                             let row = $('<tr>');
                             row.append('<td>' + record.data_turno + '</td>');
@@ -386,6 +395,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
 
                             $('#table-body').append(row);
 
+                            /* inserimento solo dopo ultimo record */
                             if (nRows == lunghezza) {
                                 if (m > 0) {
                                     ++m;
@@ -393,8 +403,13 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                 }
                                     
                                 let row2 = $('<tr>');
-                                row2.append('<td colspan="5">Efficienza turno = ' + efficienzaTurno + '%</td>');
-                                row2.append('<td colspan="5">Qualità turno = ' + qualitaTurno.toFixed(2) + '%</td>');
+                                if (efficienzaTurno <= 80) {
+                                    row2.append('<td colspan="5"><b class="text-danger">Efficienza turno = ' + efficienzaTurno + '%</b></td>');
+                                    row2.append('<td colspan="6"><b class="text-danger">Qualità turno = ' + qualitaTurno + '%</b></td>');
+                                } else {
+                                    row2.append('<td colspan="5"><b>Efficienza turno = ' + efficienzaTurno + '%</b></td>');
+                                    row2.append('<td colspan="6"><b>Qualità turno = ' + qualitaTurno + '%</b></td>');
+                                }
                                 row2.append('</tr>');
                                 $('#table-body').append(row2);
                             }
