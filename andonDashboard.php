@@ -183,6 +183,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                             <th>Lavorazione</th>
                             <th>Operatore</th>
                             <th>TC</th>
+                            <th>pz.ora</th>
                             <th>Obiettivo</th>
                             <th>Pz. Realizz.</th>
                             <th>Pz. buoni</th>
@@ -203,6 +204,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                 <th>Lavorazione</th>
                                 <th>Operatore</th>
                                 <th>TC</th>
+                                <th>pz.ora</th>
                                 <th>Obiettivo</th>
                                 <th>Pz. Realizz.</th>
                                 <th>Pz. buoni</th>
@@ -219,6 +221,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                 <th>Lavorazione</th>
                                 <th>Operatore</th>
                                 <th>TC</th>
+                                <th>pz.ora</th>
                                 <th>Obiettivo</th>
                                 <th>Pz. Realizz.</th>
                                 <th>Pz. buoni</th>
@@ -328,7 +331,6 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                         $('#table-body').empty();
 
                         // Add a new row for each record
-                        let efficienzaTurno = 0;
                         let qualitaTurno = 0;
                         let dataTurnoPrec = "";
                         let m = 0;
@@ -339,21 +341,20 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                         // Populate Bootstrap table
                         $.each(data.records, function(i, record) {
                             // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno
-                            let efficienzaParsificata = parseFloat(record.efficienza);
+                            let efficienzaTurno = record.effTurno;
                             let qualitaParsificata = parseFloat(record.qualita);
-                            efficienzaTurno += efficienzaParsificata;
                             qualitaTurno += qualitaParsificata;
                                 
-                            if ((record.data_turno != dataTurnoPrec && dataTurnoPrec != "")) {
+                            if (record.data_turno != dataTurnoPrec && dataTurnoPrec != "") {
                                 // devo sottrarre il record appena sommato perchè appartiene al turno dopo, successivamente dovrò assegnare questo valore alle variabili efficienzaTurno e QualitaTurno per non perderne traccia
-                                efficienzaTurno -= efficienzaParsificata;
+                                
                                 qualitaTurno -= qualitaParsificata;
                                     
                                 if (m > 0) {
-                                    efficienzaTurno = (efficienzaTurno/m).toFixed(2);
+                                    
                                     qualitaTurno = (qualitaTurno/m).toFixed(2);
                                 } else {
-                                    efficienzaTurno = efficienzaTurno.toFixed(2);
+                                    
                                     qualitaTurno = qualitaTurno.toFixed(2);
                                 }
                                                                     
@@ -363,7 +364,6 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                 row1.append('</tr>');
                                 $('#table-body').append(row1);
 
-                                efficienzaTurno = efficienzaParsificata;
                                 qualitaTurno = qualitaParsificata;
                                 m = 0;
                             }
@@ -375,12 +375,13 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                             row.append('<td>' + record.codice_ciclo + '</td>');
                             row.append('<td><a href="dettagliOperatore.php?sigla=' + record.sigla + '&data=' + record.data_turno + '&codCiclo=' + record.codice_ciclo + '" target="_blank">' + record.sigla + '</a></td>');
                             row.append('<td>' + record.tempo_ciclo + '</td>');
-                            row.append('<td>' + record.pzObiettivo.toFixed(1) + '</td>');
+                            row.append('<td>' + record.pzPossibiliDaRealizzareOra + '</td>');
+                            row.append('<td>' + record.pzObiettivo + '</td>');
                             row.append('<td>' + record.sommaTotPzRealizzati + '</td>');
                             row.append('<td>' + record.totPzBuoni + '</td>');
                             row.append('<td>' + record.totPzScarti + '</td>');
-                            row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
-                            row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+                            row.append('<td>' + record.efficienza + '%</td>');
+                            row.append('<td>' + record.qualita + '%</td>');
                             row.append('</tr>');
 
                             $('#table-body').append(row);
@@ -388,12 +389,11 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                             if (nRows == lunghezza) {
                                 if (m > 0) {
                                     ++m;
-                                    efficienzaTurno = (efficienzaTurno/m);
                                     qualitaTurno = (qualitaTurno/m);
                                 }
                                     
                                 let row2 = $('<tr>');
-                                row2.append('<td colspan="5">Efficienza turno = ' + efficienzaTurno.toFixed(2) + '%</td>');
+                                row2.append('<td colspan="5">Efficienza turno = ' + efficienzaTurno + '%</td>');
                                 row2.append('<td colspan="5">Qualità turno = ' + qualitaTurno.toFixed(2) + '%</td>');
                                 row2.append('</tr>');
                                 $('#table-body').append(row2);
@@ -417,12 +417,13 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                             row.append('<td>' + record.codice_ciclo + '</td>');
                             row.append('<td><a href="dettagliOperatore.php?sigla=' + record.sigla + '&data=' + record.data_turno + '&codCiclo=' + record.codice_ciclo + '" target="_blank">' + record.sigla + '</a></td>');
                             row.append('<td>' + record.tempo_ciclo + '</td>');
-                            row.append('<td>' + record.pzObiettivo.toFixed(1) + '</td>');
+                            row.append('<td>' + record.pzPossibiliDaRealizzareOra + '</td>');
+                            row.append('<td>' + record.pzObiettivo + '</td>');
                             row.append('<td>' + record.sommaTotPzRealizzati + '</td>');
                             row.append('<td>' + record.totPzBuoni + '</td>');
                             row.append('<td>' + record.totPzScarti + '</td>');
-                            row.append('<td>' + record.efficienza.toFixed(2) + '%</td>');
-                            row.append('<td>' + record.qualita.toFixed(2) + '%</td>');
+                            row.append('<td>' + record.efficienza + '%</td>');
+                            row.append('<td>' + record.qualita + '%</td>');
                             row.append('</tr>');
 
                             $('#data-table tbody').append(row);

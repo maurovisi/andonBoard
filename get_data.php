@@ -58,7 +58,8 @@ try {
                 $endDate = date('Y-m-t', strtotime($year . '-12-01'));
                 break;
             default:
-                // Durata non gestita
+                $startDate = $year . '-' . $start . '-01';
+                $endDate = date('Y-m-t', strtotime($startDate));
                 break;
         }
     }    
@@ -203,7 +204,7 @@ try {
     $pzObiettivo = 0;
     $sommaTotPzRealizzati = 0;
     $orarioDiLavoro = 0;
-    $tempoLavorazioneUtile = 0;
+    $tempoLavorazioneUtile = 0;    
     $pzMax = 0;
 
     $numRecord = count($dati);
@@ -214,8 +215,9 @@ try {
     $details = [];
 
     if ($numRecord > 0) {
-
-        /* RECUPERO IL TEMPO DI LAVORO IN BASE AL TIPO DI CONTRATTO O DI MACCHINA */        
+        
+        /* RECUPERO IL TEMPO DI LAVORO IN BASE AL TIPO DI CONTRATTO O DI MACCHINA */     
+         
         if ($what == "operatore") {
 
             $queryOrario = "SELECT contract FROM operatori WHERE sigla = :sigla";
@@ -255,69 +257,80 @@ try {
             $orarioDiLavoro = 28800;
 
         }
-        
-        foreach ($dati as $record) { 
+
+        $dataTurnoPrec = null;
+        $orarioDiLavoro_record = 0;
+        $pzMax_record = 0;
+        $efficienza_record = 0;
+        $qualita_record = 0;
+        $efficienza_turno = 0;
+        $pzMax_turno = 0;
+        $totEff_record = 0;
+        $totOreLavoro = 0;
+        $numLavorazioniPerTurno = 1;
+                 
+        foreach ($dati as $record) {
             $tempoCiclo = intval($record['tempo_ciclo']);
             $totPzRealizzati = intval($record['totPzRealizzati']);
             $totPzScarti = intval($record['totPzScarti']);
-            $efficienza_record = 0;
-            $qualita_record = 0;
+            $oreLavoro = intval($record['oreLavoro']);
+            $currentDateObj1 = new DateTime($record['data_turno']);            
+
+            if ($n == 0) {
+                $dataTurnoPrec = $currentDateObj1;
+            }
+
+            $orarioDiLavoro_record = $record['pranzo'] !== NULL ? (($oreLavoro - 1) * 3600) + 1800 : $oreLavoro * 3600;
+            
+            if ($currentDateObj1 != $dataTurnoPrec) {
+                $totEff_record = 0;
+                $totOreLavoro = 0;
+                $efficienza_turno = 0; // non indispensabile ma diamo più ordine al codice
+                $numLavorazioniPerTurno = 1;
+            } else {
+                $numLavorazioniPerTurno += 1;
+            }
 
             if ($tempoCiclo != 0) {
-                //$orarioDiLavoro = ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999" || $resources=="GS" || $resources=="SM") ? 28800 : 27000;
-                $pzMax = $orarioDiLavoro / $tempoCiclo;
-                $efficienza_record = (100/$pzMax)*$totPzRealizzati;
-                $efficienzaTot += $efficienza_record;
-                $totPzPossibiliDaRealizzare = round(3600/$tempoCiclo, 1); 
-                $AllTotPzPossibiliDaRealizzare += $totPzPossibiliDaRealizzare;
+                $pzPossibiliDaRealizzareOra = round(3600/$tempoCiclo, 1);
+                $pzMax_record = round(($orarioDiLavoro_record / $tempoCiclo),2,PHP_ROUND_HALF_UP);
+                $efficienza_record = round(((100/$pzMax_record)*$totPzRealizzati),2,PHP_ROUND_HALF_UP);
+                $totEff_record += $efficienza_record;
+                $totOreLavoro += $oreLavoro;
+                $efficienza_turno = round(((($totEff_record/8)*$totOreLavoro)/$numLavorazioniPerTurno),2,PHP_ROUND_HALF_UP);
             } else {
                 $tempoCiclo = "ERRORE";
-                $totPzPossibiliDaRealizzare = "ERRORE";
             }
             
-            if ($totPzRealizzati != 0 || $totPzScarti != 0) {
-                //$qualita_record = ($totPzRealizzati / ($totPzRealizzati + $totPzScarti)) * 100;
-                $qualita_record = 100 - ($totPzScarti / ($totPzRealizzati + $totPzScarti)) * 100;
-                //$qualita_record = (100/($totPzRealizzati + $totPzScarti))*$totPzRealizzati;
-                $qualitaTot += $qualita_record;
-                $usoRisorsaTot += ($totPzRealizzati + $totPzScarti) * $tempoCiclo;
-            }
-
-            $pzBuoniRealizzati += $totPzRealizzati;
-            $totalePezziRealizzati += ($totPzRealizzati + $totPzScarti);
-            $pzScartiRealizzati += $totPzScarti;
-
-            if ($resources=="012" || $resources=="015" || $resources=="023" || $resources=="999" || $resources=="GS" || $resources=="SM") {
-                $pzObiettivo = 3600*$record['oreLavoro']/$tempoCiclo; //$pzObiettivo = $totPzPossibiliDaRealizzare * $record['oreLavoro'];
-            } else {
-                if ($record['pranzo'] === NULL) {
-                    $pzObiettivo = 3600*$record['oreLavoro']/$tempoCiclo; //$pzObiettivo = $totPzPossibiliDaRealizzare * $record['oreLavoro'];
-                } else {
-                    $pzObiettivo = (3600*($record['oreLavoro']-1)+1800)/$tempoCiclo; //$pzObiettivo = ($totPzPossibiliDaRealizzare * ($record['oreLavoro'] - 1)) + ($totPzPossibiliDaRealizzare / 2);
-                }
-            }
+            $qualita_record = $totPzRealizzati != 0 ? round((100 - ($totPzScarti / ($totPzRealizzati + $totPzScarti)) * 100),2,PHP_ROUND_HALF_UP) : 0;
             
             $sommaTotPzRealizzati = $totPzRealizzati + $totPzScarti;
+
+            // inizio variabili per calcolo totale periodo scelto (mese, trimestre, etc)
+            $pzBuoniRealizzati += $totPzRealizzati;
+            $totalePezziRealizzati += $sommaTotPzRealizzati;
             
             // Creo un array con i dettagli per ogni giorno e turno            
             $details[$n] = [
-                'pzObiettivo' => $pzObiettivo,
+                'oreLavoro' => $oreLavoro,
+                'pzObiettivo' => $pzMax_record,
                 'sommaTotPzRealizzati' => $sommaTotPzRealizzati,
-                'totPzRealizzati' => $record['totPzRealizzati'],
-                'totPzBuoni' => $record['totPzRealizzati'],
-                'totPzScarti' => $record['totPzScarti'],
+                'totPzBuoni' => $totPzRealizzati,
+                'totPzScarti' => $totPzScarti,
                 'tempo_ciclo' => $tempoCiclo,
-                'pzDaRealizzare' => $totPzPossibiliDaRealizzare,
+                'pzPossibiliDaRealizzareOra' => $pzPossibiliDaRealizzareOra,
                 'codice_ciclo' => $record['codice_ciclo'],
                 'data_turno' => $record['data_turno'],
                 'sigla' => $record['sigla'],
                 'efficienza' => $efficienza_record,
                 'qualita' => $qualita_record,
+                'effTurno' => $efficienza_turno,
             ];
             
+            $dataTurnoPrec = $currentDateObj1;
             $n++;
         }
-
+        
         // calcolo tempo utile max in base all'intervallo di tempo scelto dal form
         switch ($efficiency) {
             case 'settimanale':
@@ -341,29 +354,20 @@ try {
                 break;
         }
 
-        $efficienzaTot = round(($efficienzaTot / $numRecord),2,PHP_ROUND_HALF_UP);
-        //$efficienzaTotaleR = round(((100/$totalePezziRealizzati)*$pzBuoniRealizzati),2,PHP_ROUND_HALF_UP);
-        //$efficienzaTotaleR = round((($totalePezziRealizzati/$AllTotPzPossibiliDaRealizzare)*100),2,PHP_ROUND_HALF_UP);
-        //$qualitaTot = round(($qualitaTot / $numRecord),2,PHP_ROUND_HALF_UP);
-        $qualitaTot  = round((($pzBuoniRealizzati/$totalePezziRealizzati)*100),2,PHP_ROUND_HALF_UP);
-        
-        if ($tempoUtileSett_01 != "errore") {
-            $usoRisorsaTot = round(((100 / $tempoUtileSett_01) * $usoRisorsaTot),2,PHP_ROUND_HALF_UP);
-        } else {
-            $usoRisorsaTot = "errore";
-        }
-        
+        $efficienzaTot = 100;
+        $qualitaTot = $sommaTotPzRealizzati != 0 ? round((($pzBuoniRealizzati/$totalePezziRealizzati)*100),2,PHP_ROUND_HALF_UP) : "ERROR";
+        $usoRisorsaTot = $tempoUtileSett_01 != "errore" ? round(((100 / $tempoUtileSett_01) * $usoRisorsaTot),2,PHP_ROUND_HALF_UP) : "ERROR";
+                
     }
 
     echo json_encode([
         'usoRisorsaTot' => $usoRisorsaTot,
         'efficienzaTot' => $efficienzaTot,
-        'efficienzaTotaleR' => $efficienzaTotaleR,
         'qualitaTot' => $qualitaTot,
         'totPzPossibiliDaRealizzare' => $totPzPossibiliDaRealizzare,
-        'pzBuoniRealizzati' => "$pzBuoniRealizzati",
-        'totalePezziRealizzati' => "$totalePezziRealizzati",
-        'pzScartiRealizzati' => "$pzScartiRealizzati",
+        'pzBuoniRealizzati' => $pzBuoniRealizzati,
+        'totalePezziRealizzati' => $totalePezziRealizzati,
+        'pzScartiRealizzati' => $pzScartiRealizzati,
         'records' => $details,
     ]);
 
