@@ -147,13 +147,15 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                     <button type="button" class="btn btn-info" data-target="data-table">Visualizza tabella per Export</button>
                 </div>
             </form>
-
+            <!--
             <h5 class="mt-5">Utilizzo Risorsa Totale: <span class="fw-bold" id="usoRisorsaTot"></span></h5>
-            <p class="pb-2">Rapporto tra il tempo massimo disponibile per far lavorare la macchina e quello in cui effettivamente ha lavorato.</p>
+            <p class="pb-2">Rapporto tra il tempo massimo disponibile per far lavorare la macchina e quello in cui effettivamente ha lavorato.</p> -->
             <h5>Efficienza Totale: <span class="fw-bold" id="efficienza-totale"></span></h5>
-            <p class="pb-2">Efficienza Totale calcolata in rapporto tra il numero di pezzi max teoricamente realizzabili e quelli buoni effettivamente realizzati tenendo conto dei diversi TC per i vari pz.</p>
+            <p class="pb-2">Efficienza Totale calcolata in base alla somma delle efficienze dei turni, potrebbe differire dall'efficienza calcolata in rapporto alle ore di lavoro effettivamente lavorate e quelle con profitto.</p>
             <h5>Tot pz. realizz. <span class="fw-bold" id="totalePezziRealizzati"></span> | Tot pz. buoni <span class="fw-bold" id="pzBuoniRealizzati"></span> | Tot pz. scarti <span class="fw-bold" id="pzScartiRealizzati"></span></h5>
-            <h5 class="mb-5">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span> | % di scarto <span class="fw-bold" id="percentualeScarto"></span></h5>
+            <h5 class="pb-4">Qualità Totale: <span class="fw-bold" id="qualita-totale"></span> | % di scarto <span class="fw-bold" id="percentualeScarto"></span></h5>            
+            <h5>Ore di lavoro complessive <span class="fw-bold" id="oreMax"></span> | Ore lavorate con profitto: <span class="fw-bold" id="oreProfittevoli"></span> | % di scarto <span class="fw-bold" id="scartoOre"></span></h5>
+            <p class="mb-5">Ore massime possibili e ore effettivamente lavorate con profitto</p>
 
             <table class="table table-striped table-hover">
                 <thead>
@@ -309,12 +311,13 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                     data: $(this).serialize(),
                     dataType: 'json', // Expect a JSON response
                     success: function(data) {
+                        /*
                         if (data.usoRisorsaTot != 'errore') {
                             $('#usoRisorsaTot').text(data.usoRisorsaTot.toFixed(2) + '%');
                         } else {
                             $('#usoRisorsaTot').text('Calcolo non possibile per questa opzione.');
                         }
-                        
+                        */
                         $('#efficienza-totale').text(data.efficienzaTot.toFixed(2) + '%');
                         //$('#efficienza-totale-R').text(data.efficienzaTotaleR.toFixed(2) + '%');
                         $('#qualita-totale').text(data.qualitaTot.toFixed(2) + '%');
@@ -323,6 +326,9 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                         $('#pzBuoniRealizzati').text(data.pzBuoniRealizzati);
                         $('#pzScartiRealizzati').text(data.pzScartiRealizzati);
                         $('#percentualeScarto').text((100 - data.qualitaTot).toFixed(2) + '%');
+                        $('#oreMax').text(data.totOreLavoroIntervallo);
+                        $('#oreProfittevoli').text(data.totOreProfittevoli);
+                        $('#scartoOre').text(data.scartoOre + '%');
 
                         let lastDate = '';
                         let lastShift = '';

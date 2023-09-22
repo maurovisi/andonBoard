@@ -204,7 +204,8 @@ try {
     $pzObiettivo = 0;
     $sommaTotPzRealizzati = 0;
     $orarioDiLavoro = 0;
-    $tempoLavorazioneUtile = 0;    
+    $tempoLavorazioneUtile = 0;
+    $totOreLavoroIntervallo = 0;
     $pzMax = 0;
 
     $numRecord = count($dati);
@@ -267,13 +268,18 @@ try {
         $pzMax_turno = 0;
         $totEff_record = 0;
         $totOreLavoro = 0;
+        $totEffIntervallo = 0;
+        $totOreProfittevoli = 0;
+        $scartoOre = 0;
         $numLavorazioniPerTurno = 1;
                  
         foreach ($dati as $record) {
             $tempoCiclo = intval($record['tempo_ciclo']);
             $totPzRealizzati = intval($record['totPzRealizzati']);
             $totPzScarti = intval($record['totPzScarti']);
+            $pzScartiRealizzati += $totPzScarti;
             $oreLavoro = intval($record['oreLavoro']);
+            $totOreLavoroIntervallo += $oreLavoro;
             $currentDateObj1 = new DateTime($record['data_turno']);            
 
             if ($n == 0) {
@@ -300,6 +306,7 @@ try {
                 $totEff_record += $efficienza_record;
                 $totOreLavoro += $oreLavoro;
                 $efficienza_turno = round(((($totEff_record/8)*$totOreLavoro)/$numLavorazioniPerTurno),2,PHP_ROUND_HALF_UP);
+                $totEffIntervallo += $efficienza_turno;
             } else {
                 $tempoCiclo = "ERRORE";
             }
@@ -311,7 +318,8 @@ try {
             // inizio variabili per calcolo totale periodo scelto (mese, trimestre, etc)
             $pzBuoniRealizzati += $totPzRealizzati;
             $totalePezziRealizzati += $sommaTotPzRealizzati;
-            
+            $totOreProfittevoli += (($oreLavoro/100)*$efficienza_turno);
+                        
             // Creo un array con i dettagli per ogni giorno e turno            
             $details[$n] = [
                 'oreLavoro' => $oreLavoro,
@@ -334,6 +342,7 @@ try {
         }
         
         // calcolo tempo utile max in base all'intervallo di tempo scelto dal form
+        /*
         switch ($efficiency) {
             case 'settimanale':
                 $tempoUtileSett_01 = $tempoUtileSett_01;
@@ -355,21 +364,26 @@ try {
                 $tempoUtileSett_01 = "errore";
                 break;
         }
-
-        $efficienzaTot = 100;
+        */
+        $efficienzaTot = $numRecord!=0 ? round(($totEffIntervallo/$numRecord),2,PHP_ROUND_HALF_UP) : "ERROR";
         $qualitaTot = $sommaTotPzRealizzati != 0 ? round((($pzBuoniRealizzati/$totalePezziRealizzati)*100),2,PHP_ROUND_HALF_UP) : "ERROR";
-        $usoRisorsaTot = $tempoUtileSett_01 != "errore" ? round(((100 / $tempoUtileSett_01) * $usoRisorsaTot),2,PHP_ROUND_HALF_UP) : "ERROR";
+        //$usoRisorsaTot = $tempoUtileSett_01 != "errore" ? round(((100 / $tempoUtileSett_01) * $usoRisorsaTot),2,PHP_ROUND_HALF_UP) : "ERROR";
+        $totOreProfittevoli = round($totOreProfittevoli,2,PHP_ROUND_HALF_UP);
+        $scartoOre = round((100-((100/$totOreLavoroIntervallo)*$totOreProfittevoli)),2,PHP_ROUND_HALF_UP);
                 
     }
 
     echo json_encode([
-        'usoRisorsaTot' => $usoRisorsaTot,
+        //'usoRisorsaTot' => $usoRisorsaTot,
         'efficienzaTot' => $efficienzaTot,
         'qualitaTot' => $qualitaTot,
         'totPzPossibiliDaRealizzare' => $totPzPossibiliDaRealizzare,
         'pzBuoniRealizzati' => $pzBuoniRealizzati,
         'totalePezziRealizzati' => $totalePezziRealizzati,
         'pzScartiRealizzati' => $pzScartiRealizzati,
+        'totOreLavoroIntervallo' => $totOreLavoroIntervallo,
+        'totOreProfittevoli' => $totOreProfittevoli,
+        'scartoOre' => $scartoOre,
         'records' => $details,
     ]);
 
