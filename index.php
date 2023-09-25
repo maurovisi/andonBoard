@@ -243,23 +243,26 @@ try {
                         data: $(this).serialize(),
                         dataType: 'json', // aspettati una risposta in formato JSON
                         success: function (response) {
+                            // Parse la risposta JSON
+                            let parsedResponse = JSON.parse(response);
+
                             let color = "success"; // colore verde per successo
                             let buttonColor = '#3085d6'; // colore del pulsante per successo
 
-                            if (response.status === "error") {
-                                console.error(response.detailed_message);
+                            if (parsedResponse.status === "error") {
+                                console.error(parsedResponse.message);
                                 color = "error"; // colore rosso per errore
                                 buttonColor = '#d33'; // colore del pulsante per errore
                             }
 
                             Swal.fire({
                                 icon: color,
-                                title: response.message,
+                                title: parsedResponse.message,
                                 confirmButtonColor: buttonColor, // colore del pulsante
                                 allowOutsideClick: false // impedisce la chiusura dell'alert se si fa clic fuori
                             });
 
-                            $('#formAndonBoard')[0].reset();
+                            //$('#formAndonBoard')[0].reset();
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             Swal.fire({

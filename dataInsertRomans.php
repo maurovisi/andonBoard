@@ -113,6 +113,8 @@ try {
                         <select class="form-select" id="orario" name="orario" required>
                             <option value="">Selezionare</option>
                             <option value="daily">Giornaliero</option>
+                            <option value="mat">Mattina</option>
+                            <option value="pom">Pomeriggio</option>
                         </select>
                         <div class="invalid-feedback">
                             Seleziona un intervallo di tempo.
@@ -236,6 +238,7 @@ try {
             $('#operatore').on('change', function () {
                 let operatore = $("#operatore option:selected").text();
 
+                // inserire le sigle operatore non a giornata in modo che solo per loro sia selezionabile l'opzione pranzo
                 if (operatore) {
                     let campoPranzoVisibility = $('#campoPranzo');
                     if (operatore === 'GS' || operatore === 'SM') {
@@ -289,10 +292,12 @@ try {
                     }                   
                 } else if(validation == '3') {
                     // montaggio
+                    /*
                     if (pezziMontati.val() == 0) {
                         isValid = false;
                         pezziMontati.after('<p class="error-message" style="color: darkred; font-size: smaller;">Inserire num. pz. montati</p>');
                     }
+                    */
                 } else if(validation == '4') {
                     // seghe
                     if (cicloInsert.val() === '') {
@@ -312,23 +317,24 @@ try {
                         url: "insertdataRomans.php",
                         data: $(this).serialize(),
                         success: function (response) {
+                            // Parse la risposta JSON
+                            let parsedResponse = JSON.parse(response);
+
                             let color = "success"; // colore verde per successo
                             let buttonColor = '#3085d6'; // colore del pulsante per successo
 
                             // Se la risposta contiene la parola "Errore", cambia il colore in rosso
-                            if (response.includes("Errore")) {
+                            if (parsedResponse.message && parsedResponse.message.includes("Errore")) {
                                 color = "error"; // colore rosso per errore
                                 buttonColor = '#d33'; // colore del pulsante per errore
                             }
 
                             Swal.fire({
                                 icon: color,
-                                title: response,
+                                title: parsedResponse.message,
                                 confirmButtonColor: buttonColor, // colore del pulsante
                                 allowOutsideClick: false // impedisce la chiusura dell'alert se si fa clic fuori
                             });
-
-                            $('#formAndonBoard')[0].reset();
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             Swal.fire({

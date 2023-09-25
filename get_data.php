@@ -67,6 +67,8 @@ try {
     $efficienza = 0;
     $qualita = 0;
     $queryEfficiency = "";
+    $queryStat = "";
+    $stmt1 = "";
 
     if ($efficiency == "settimanale" && $what == "risorsa") {
 
@@ -84,6 +86,8 @@ try {
         $stmt->bindParam(':dataSetteGgFa', $dataSetteGgFa);
         $stmt->bindParam(':dataOdierna', $dataOdierna);
         $stmt->bindParam(':resources', $resources);
+
+        
 
     } elseif (($efficiency == "mensile" || $efficiency == "trimestrale" || $efficiency == "semestrale" || $efficiency == "annuale") && $what == "risorsa") {
 
@@ -134,6 +138,21 @@ try {
         $stmt->bindParam(':dataOdierna', $dataOdierna);
         $stmt->bindParam(':operatore', $resources);
 
+        // query statistiche pz prodotti per ogni tipo
+        $queryStat = "SELECT c.codice_ciclo, SUM(num_pz_ora) AS obiettivo, SUM(num_pz_realizzati + num_pz_scarti) AS pzTot, SUM(num_pz_realizzati) AS pzBuoni, SUM(num_pz_scarti) AS pzScarti, risorse.risorsa
+                      FROM andon_board AS a
+                        INNER JOIN cicli AS c ON a.id_ciclo = c.id_ciclo
+                        INNER JOIN risorse ON a.id_risorsa = risorse.id
+                        INNER JOIN operatori ON a.id_operatore = operatori.id
+                      WHERE operatori.sigla = :operatore AND data_turno BETWEEN :dataSetteGgFa AND :dataOdierna  
+                        GROUP BY c.codice_ciclo, risorse.risorsa 
+                        ORDER By pzBuoni DESC, pzTot DESC, obiettivo DESC, pzScarti DESC, c.codice_ciclo";
+
+        $stmt1 = $pdo->prepare($queryStat);
+        $stmt1->bindParam(':dataSetteGgFa', $dataSetteGgFa);
+        $stmt1->bindParam(':dataOdierna', $dataOdierna);
+        $stmt1->bindParam(':operatore', $resources);
+
     } elseif (($efficiency == "mensile" || $efficiency == "trimestrale" || $efficiency == "semestrale" || $efficiency == "annuale") && $what == "operatore") {
         
         $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
@@ -151,6 +170,21 @@ try {
         $stmt->bindParam(':dataEnd', $endDate);
         $stmt->bindParam(':operatore', $resources);
 
+        // query statistiche pz prodotti per ogni tipo
+        $queryStat = "SELECT c.codice_ciclo, SUM(num_pz_ora) AS obiettivo, SUM(num_pz_realizzati + num_pz_scarti) AS pzTot, SUM(num_pz_realizzati) AS pzBuoni, SUM(num_pz_scarti) AS pzScarti, risorse.risorsa 
+                      FROM andon_board AS a
+                        INNER JOIN cicli AS c ON a.id_ciclo = c.id_ciclo
+                        INNER JOIN risorse ON a.id_risorsa = risorse.id
+                        INNER JOIN operatori ON a.id_operatore = operatori.id
+                      WHERE operatori.sigla = :operatore AND data_turno BETWEEN :dataStart AND :dataEnd  
+                        GROUP BY c.codice_ciclo, risorse.risorsa 
+                        ORDER By pzBuoni DESC, pzTot DESC, obiettivo DESC, pzScarti DESC, c.codice_ciclo";
+
+        $stmt1 = $pdo->prepare($queryStat);
+        $stmt1->bindParam(':dataStart', $startDate);
+        $stmt1->bindParam(':dataEnd', $endDate);
+        $stmt1->bindParam(':operatore', $resources);
+
     } elseif ($efficiency == "tutto" && $what == "operatore") {
         
         $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
@@ -166,25 +200,42 @@ try {
         $stmt = $pdo->prepare($queryEfficiency);
         $stmt->bindParam(':operatore', $resources);
 
+        // query statistiche pz prodotti per ogni tipo
+        $queryStat = "SELECT c.codice_ciclo, SUM(num_pz_ora) AS obiettivo, SUM(num_pz_realizzati + num_pz_scarti) AS pzTot, SUM(num_pz_realizzati) AS pzBuoni, SUM(num_pz_scarti) AS pzScarti, risorse.risorsa 
+                      FROM andon_board AS a
+                        INNER JOIN cicli AS c ON a.id_ciclo = c.id_ciclo
+                        INNER JOIN risorse ON a.id_risorsa = risorse.id
+                        INNER JOIN operatori ON a.id_operatore = operatori.id
+                      WHERE operatori.sigla = :operatore 
+                        GROUP BY c.codice_ciclo, risorse.risorsa 
+                        ORDER By pzBuoni DESC, pzTot DESC, obiettivo DESC, pzScarti DESC, c.codice_ciclo";
+
+        $stmt1 = $pdo->prepare($queryStat);
+        $stmt1->bindParam(':operatore', $resources);
 
     } else {
         // errore
         echo json_encode([
-            'usoRisorsaTot' => "ERRORE",
             'efficienzaTot' => "ERRORE",
             'qualitaTot' => "ERRORE",
-            'efficienzaTotaleR' => "ERRORE",
             'totPzPossibiliDaRealizzare' => "ERRORE",
             'pzBuoniRealizzati' => "ERRORE",
             'totalePezziRealizzati' => "ERRORE",
             'pzScartiRealizzati' => "ERRORE",
+            'totOreLavoroIntervallo' => "ERRORE",
+            'totOreProfittevoli' => "ERRORE",
+            'scartoOre' => "ERRORE",
             'records' => "ERRORE",
+            'details1' => "ERRORE",
         ]);
         die;
     }
 
     $stmt->execute();
     $dati = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmt1->execute();
+    $dati1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
     
     $tempoMacchinaAccesaTot = 0;
     $tempoProduzioneTot = 0;
@@ -209,11 +260,40 @@ try {
     $pzMax = 0;
 
     $numRecord = count($dati);
+    $numRecord1 = count($dati1);
     
     // calcolo efficienza e qualità per ogni gg, includo anche tutte le righe dei record suddivisi per turno e gg
 
     $n = 0;
     $details = [];
+    $details1 = [];
+
+    if ($numRecord1 > 0) {
+        foreach ($dati1 as $record) {
+            $codicePz_qs = $record['codice_ciclo'];
+            $obiettivo_qs = intval($record['obiettivo']);
+            $pzTot_qs = intval($record['pzTot']);
+            $pzBuoni_qs = intval($record['pzBuoni']);
+            $pzScarti_qs = intval($record['pzScarti']);
+            $risorsa = $record['risorsa'];
+
+            $efficienza_qs = $obiettivo_qs != 0 ? round(((100/$obiettivo_qs)*$pzBuoni_qs),2,PHP_ROUND_HALF_UP) : "ERRORE";
+
+            $details1[$n] = [
+                'codicePz_qs' => $codicePz_qs,
+                'obiettivo_qs' => $obiettivo_qs,
+                'pzTot_qs' => $pzTot_qs,
+                'pzBuoni_qs' => $pzBuoni_qs,
+                'pzScarti_qs' => $pzScarti_qs,
+                'efficienza_qs' => $efficienza_qs,
+                'risorsa' => $risorsa,
+            ];
+
+            $n++;
+        }
+    }
+
+    $n = 0;
 
     if ($numRecord > 0) {
         
@@ -385,6 +465,7 @@ try {
         'totOreProfittevoli' => $totOreProfittevoli,
         'scartoOre' => $scartoOre,
         'records' => $details,
+        'details1' => $details1,
     ]);
 
 } catch (PDOException $e) {

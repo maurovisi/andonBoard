@@ -162,12 +162,14 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                     <tr class="table-info">
                         <th>Pezzo</th>
                         <th>Obiettivo</th>
+                        <th>Pz. Tot</th>
                         <th>T.pz. Buoni</th>
                         <th>Tpz. Scarti</th>
                         <th>Efficienza</th>
+                        <th>Risorsa</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tBodyStat">
 
                 </tbody>
             </table>
@@ -178,7 +180,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
 
             <div class="table-container">
 
-                <table class="table table-striped mt-4" id="bootstrap-table">
+                <table class="table table-hover mt-4" id="bootstrap-table">
                     <thead>
                         <tr>
                             <th>Data</th>
@@ -199,7 +201,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                 </table>
 
                 <div id="data-table-container" style="display: none;">
-                    <table class="table table-striped" id="data-table">
+                    <table class="table table-striped table-hover" id="data-table">
                         <thead>
                             <tr>
                                 <th>Data</th>
@@ -345,6 +347,25 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
 
                         let lunghezza = Object.keys(data.records).length;
 
+                         // Clear out the existing rows
+                         $('#tBodyStat').empty();
+
+                        // populate pz table efficiency
+                        $.each(data.details1, function(i, record) {
+                            
+                            let rowStat = $('<tr>');
+                            rowStat.append('<td>'+ record.codicePz_qs +'</td>');
+                            rowStat.append('<td>'+ record.obiettivo_qs +'</td>');
+                            rowStat.append('<td>'+ record.pzTot_qs +'</td>');
+                            rowStat.append('<td>'+ record.pzBuoni_qs +'</td>');
+                            rowStat.append('<td>'+ record.pzScarti_qs +'</td>');
+                            rowStat.append('<td>'+ record.efficienza_qs +'</td>');
+                            rowStat.append('<td>'+ record.risorsa +'</td>');
+                            rowStat.append('</tr>');
+                            $('#tBodyStat').append(rowStat);
+
+                        });
+
                         // Populate Bootstrap table
                         $.each(data.records, function(i, record) {
                             // sommo efficienza e qualità di ogni turno e la scrivo prima del nuovo turno                            
@@ -365,7 +386,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                     qualitaTurno = qualitaTurno.toFixed(2);
                                 }
                                                                     
-                                let row1 = $('<tr>');
+                                let row1 = $('<tr class="table-primary">');
 
                                 if (efficienzaTurno <= 80) {
                                     row1.append('<td colspan="5"><b class="text-danger">Efficienza turno = ' + efficienzaTurno + '%</b></td>');
@@ -408,7 +429,7 @@ $operatori = $pdo->query("SELECT DISTINCT sigla FROM operatori")->fetchAll(PDO::
                                     qualitaTurno = (qualitaTurno/m);
                                 }
                                     
-                                let row2 = $('<tr>');
+                                let row2 = $('<tr class="table-primary">');
                                 if (efficienzaTurno <= 80) {
                                     row2.append('<td colspan="5"><b class="text-danger">Efficienza turno = ' + efficienzaTurno + '%</b></td>');
                                     row2.append('<td colspan="6"><b class="text-danger">Qualità turno = ' + qualitaTurno + '%</b></td>');
