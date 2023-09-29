@@ -241,7 +241,7 @@ try {
                 // inserire le sigle operatore non a giornata in modo che solo per loro sia selezionabile l'opzione pranzo
                 if (operatore) {
                     let campoPranzoVisibility = $('#campoPranzo');
-                    if (operatore === 'GS' || operatore === 'SM') {
+                    if (operatore === 'GS' || operatore === 'SM' || operatore === 'SG') {
                         campoPranzoVisibility.hide();
                     } else {
                         campoPranzoVisibility.show();
