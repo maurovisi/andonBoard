@@ -87,7 +87,20 @@ try {
         $stmt->bindParam(':dataOdierna', $dataOdierna);
         $stmt->bindParam(':resources', $resources);
 
-        
+        // query statistiche pz prodotti per ogni tipo
+        $queryStat = "SELECT c.codice_ciclo, SUM(num_pz_ora) AS obiettivo, SUM(num_pz_realizzati + num_pz_scarti) AS pzTot, SUM(num_pz_realizzati) AS pzBuoni, SUM(num_pz_scarti) AS pzScarti, risorse.risorsa
+                      FROM andon_board AS a
+                        INNER JOIN cicli AS c ON a.id_ciclo = c.id_ciclo
+                        INNER JOIN risorse ON a.id_risorsa = risorse.id
+                        INNER JOIN operatori ON a.id_operatore = operatori.id
+                      WHERE risorsa = :resources AND data_turno BETWEEN :dataSetteGgFa AND :dataOdierna  
+                        GROUP BY c.codice_ciclo, risorse.risorsa 
+                        ORDER By pzBuoni DESC, pzTot DESC, obiettivo DESC, pzScarti DESC, c.codice_ciclo";
+
+        $stmt1 = $pdo->prepare($queryStat);
+        $stmt1->bindParam(':dataSetteGgFa', $dataSetteGgFa);
+        $stmt1->bindParam(':dataOdierna', $dataOdierna);
+        $stmt1->bindParam(':resources', $resources);
 
     } elseif (($efficiency == "mensile" || $efficiency == "trimestrale" || $efficiency == "semestrale" || $efficiency == "annuale") && $what == "risorsa") {
 
@@ -106,6 +119,21 @@ try {
         $stmt->bindParam(':dataEnd', $endDate);
         $stmt->bindParam(':resources', $resources);
 
+        // query statistiche pz prodotti per ogni tipo
+        $queryStat = "SELECT c.codice_ciclo, SUM(num_pz_ora) AS obiettivo, SUM(num_pz_realizzati + num_pz_scarti) AS pzTot, SUM(num_pz_realizzati) AS pzBuoni, SUM(num_pz_scarti) AS pzScarti, risorse.risorsa 
+                      FROM andon_board AS a
+                        INNER JOIN cicli AS c ON a.id_ciclo = c.id_ciclo
+                        INNER JOIN risorse ON a.id_risorsa = risorse.id
+                        INNER JOIN operatori ON a.id_operatore = operatori.id
+                      WHERE risorsa = :resources AND data_turno BETWEEN :dataStart AND :dataEnd  
+                        GROUP BY c.codice_ciclo, risorse.risorsa 
+                        ORDER By pzBuoni DESC, pzTot DESC, obiettivo DESC, pzScarti DESC, c.codice_ciclo";
+
+        $stmt1 = $pdo->prepare($queryStat);
+        $stmt1->bindParam(':dataStart', $startDate);
+        $stmt1->bindParam(':dataEnd', $endDate);
+        $stmt1->bindParam(':resources', $resources);
+
     } elseif ($efficiency == "tutto" && $what == "risorsa") {
         
         $queryEfficiency = "SELECT SUM(ab.num_pz_realizzati) AS totPzRealizzati, SUM(ab.num_pz_scarti) AS totPzScarti, cicli.tempo_ciclo, cicli.pzDaRealizzare, cicli.codice_ciclo, ab.data_turno, operatori.sigla, SUM(ab.pranzo) AS pranzo, COUNT(*) AS oreLavoro
@@ -120,6 +148,19 @@ try {
 
         $stmt = $pdo->prepare($queryEfficiency);
         $stmt->bindParam(':resources', $resources);
+
+        // query statistiche pz prodotti per ogni tipo
+        $queryStat = "SELECT c.codice_ciclo, SUM(num_pz_ora) AS obiettivo, SUM(num_pz_realizzati + num_pz_scarti) AS pzTot, SUM(num_pz_realizzati) AS pzBuoni, SUM(num_pz_scarti) AS pzScarti, risorse.risorsa 
+                      FROM andon_board AS a
+                        INNER JOIN cicli AS c ON a.id_ciclo = c.id_ciclo
+                        INNER JOIN risorse ON a.id_risorsa = risorse.id
+                        INNER JOIN operatori ON a.id_operatore = operatori.id
+                      WHERE risorsa = :resources 
+                        GROUP BY c.codice_ciclo, risorse.risorsa 
+                        ORDER By pzBuoni DESC, pzTot DESC, obiettivo DESC, pzScarti DESC, c.codice_ciclo";
+
+        $stmt1 = $pdo->prepare($queryStat);
+        $stmt1->bindParam(':resources', $resources);
 
     } elseif ($efficiency == "settimanale" && $what == "operatore") {
         
